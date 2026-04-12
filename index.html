@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ПокеСкан">
+<title>ПокеСкан</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FFD93D;
+    --yellow-dark: #F0B429;
+    --red: #FF6B6B;
+    --blue: #4ECDC4;
+    --blue-dark: #3ABDB5;
+    --green: #6BCB77;
+    --green-dark: #4DAF58;
+    --purple: #A78BFA;
+    --bg: #1a1a2e;
+    --bg2: #16213e;
+    --card: #0f3460;
+    --card2: #1a2d5a;
+    --text: #ffffff;
+    --text2: #b8c4e0;
+    --radius: 24px;
+    --radius-sm: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, #16213e 0%, #1a1a2e 100%);
+  }
+  .stars::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 90%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 55%, rgba(255,255,255,0.4) 0%, transparent 100%);
+  }
+
+  /* ---- LAYOUT ---- */
+  .screen { display: none; flex-direction: column; align-items: center; min-height: 100vh; min-height: 100dvh; padding: 24px 20px; position: relative; z-index: 1; }
+  .screen.active { display: flex; }
+
+  /* ---- HOME ---- */
+  .home-logo { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 48px; color: var(--yellow); text-shadow: 0 4px 20px rgba(255,217,61,0.4); letter-spacing: -1px; margin-bottom: 4px; animation: pop 0.5s ease; }
+  .home-sub { font-size: 16px; color: var(--text2); margin-bottom: 16px; }
+  @keyframes pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .pokeball-big {
+    width: 160px; height: 160px; border-radius: 50%;
+    background: linear-gradient(180deg, #FF6B6B 0%, #FF6B6B 47%, #fff 47%, #fff 53%, #1a1a2e 53%);
+    border: 4px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 40px;
+    box-shadow: 0 8px 40px rgba(255,107,107,0.3);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    animation: float 3s ease-in-out infinite;
+  }
+  .pokeball-big:active { transform: scale(0.95); }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .pokeball-center { width: 36px; height: 36px; border-radius: 50%; background: white; border: 4px solid rgba(255,255,255,0.3); position: absolute; z-index: 2; }
+
+  .btn-main {
+    width: 100%; max-width: 320px;
+    padding: 18px 24px;
+    border-radius: var(--radius);
+    border: none; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 20px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-main:active { transform: scale(0.97); }
+  .btn-yellow { background: var(--yellow); color: #1a1a2e; box-shadow: 0 6px 24px rgba(255,217,61,0.35); }
+  .btn-yellow:active { box-shadow: 0 2px 10px rgba(255,217,61,0.3); }
+  .btn-blue { background: var(--blue); color: #1a1a2e; box-shadow: 0 6px 24px rgba(78,205,196,0.35); margin-top: 12px; }
+  .btn-purple { background: var(--purple); color: #1a1a2e; box-shadow: 0 6px 24px rgba(167,139,250,0.35); margin-top: 12px; }
+  .btn-green { background: var(--green); color: #1a1a2e; box-shadow: 0 6px 24px rgba(107,203,119,0.35); margin-top: 12px; }
+  .btn-red { background: var(--red); color: white; box-shadow: 0 6px 24px rgba(255,107,107,0.35); margin-top: 12px; }
+
+  /* ---- POKEDEX PROGRESS ---- */
+  .pokedex-progress { width: 100%; max-width: 280px; margin-bottom: 28px; }
+  .pokedex-label { font-size: 14px; color: var(--text2); text-align: center; margin-bottom: 8px; font-weight: 600; }
+  .pokedex-label strong { color: var(--yellow); font-family: 'Nunito', sans-serif; font-weight: 900; }
+  .pokedex-bar { width: 100%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden; }
+  .pokedex-fill { height: 100%; background: linear-gradient(90deg, var(--yellow), var(--green)); border-radius: 5px; transition: width 0.6s ease; min-width: 2px; }
+
+  /* ---- SEARCH ---- */
+  .back-btn { align-self: flex-start; background: rgba(255,255,255,0.08); border: none; color: var(--text2); font-size: 14px; font-family: 'Nunito Sans', sans-serif; font-weight: 600; padding: 8px 14px; border-radius: 12px; cursor: pointer; margin-bottom: 24px; display: flex; align-items: center; gap: 6px; }
+  .screen-title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 28px; color: var(--text); margin-bottom: 8px; text-align: center; }
+  .screen-hint { font-size: 15px; color: var(--text2); margin-bottom: 28px; text-align: center; line-height: 1.5; }
+
+  .search-wrap { width: 100%; max-width: 380px; position: relative; margin-bottom: 16px; }
+  .search-input {
+    width: 100%; padding: 18px 20px;
+    border-radius: var(--radius);
+    border: 2px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.06);
+    color: var(--text); font-size: 18px; font-family: 'Nunito', sans-serif; font-weight: 700;
+    outline: none; text-align: center; letter-spacing: 0.5px;
+    transition: border-color 0.2s;
+  }
+  .search-input::placeholder { color: rgba(255,255,255,0.25); font-weight: 600; }
+  .search-input:focus { border-color: var(--yellow); }
+
+  .suggestions { width: 100%; max-width: 380px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px; }
+  .sug-chip { background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; font-weight: 600; }
+  .sug-chip:active { background: rgba(255,217,61,0.15); border-color: var(--yellow); color: var(--yellow); }
+
+  /* ---- MATH ---- */
+  .math-card {
+    width: 100%; max-width: 380px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    text-align: center;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    animation: slide-up 0.4s ease;
+  }
+  @keyframes slide-up { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .math-pokemon-name { font-size: 14px; color: var(--yellow); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .math-title { font-size: 15px; color: var(--text2); margin-bottom: 20px; }
+  .math-expr { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 42px; color: var(--text); margin-bottom: 28px; letter-spacing: 2px; line-height: 1.2; }
+
+  .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 380px; margin-bottom: 16px; }
+  .num-btn {
+    aspect-ratio: 1; border-radius: 16px; border: none; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px;
+    background: rgba(255,255,255,0.07); color: var(--text);
+    transition: all 0.15s;
+    border: 1.5px solid rgba(255,255,255,0.1);
+  }
+  .num-btn:active { transform: scale(0.93); background: rgba(255,217,61,0.2); border-color: var(--yellow); }
+  .num-btn.selected { background: var(--yellow); color: #1a1a2e; border-color: var(--yellow); box-shadow: 0 4px 16px rgba(255,217,61,0.4); }
+  .num-btn.wrong { background: var(--red); color: white; border-color: var(--red); animation: shake 0.4s ease; }
+  .num-btn.correct { background: var(--green); color: #1a1a2e; border-color: var(--green); }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  .check-btn {
+    width: 100%; max-width: 380px;
+    padding: 18px;
+    border-radius: var(--radius);
+    border: none; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px;
+    background: var(--yellow); color: #1a1a2e;
+    box-shadow: 0 6px 24px rgba(255,217,61,0.3);
+    opacity: 0; pointer-events: none;
+    transition: all 0.2s;
+  }
+  .check-btn.visible { opacity: 1; pointer-events: all; }
+  .check-btn:active { transform: scale(0.97); }
+
+  /* ---- LIGHTNING BADGE ---- */
+  .lightning-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,217,61,0.15); border: 1.5px solid rgba(255,217,61,0.3); border-radius: 12px; padding: 6px 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: var(--yellow); margin-bottom: 12px; animation: pop 0.5s ease; }
+
+  /* ---- POKEMON CARD ---- */
+  #poke-card-content { perspective: 800px; }
+  .poke-card {
+    width: 100%; max-width: 380px;
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    animation: slide-up 0.4s ease;
+    margin-bottom: 16px;
+    transition: transform 0.1s ease-out;
+    position: relative;
+  }
+  .poke-card .tilt-shine {
+    position: absolute; inset: 0; border-radius: var(--radius);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, transparent 100%);
+    pointer-events: none; opacity: 0; transition: opacity 0.2s;
+  }
+  .poke-card.tilting .tilt-shine { opacity: 1; }
+  .poke-header { padding: 24px; display: flex; align-items: center; gap: 16px; position: relative; }
+  .poke-img-wrap { width: 100px; height: 100px; flex-shrink: 0; }
+  .poke-img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 4px 16px rgba(255,217,61,0.3)); }
+  .poke-info { flex: 1; }
+  .poke-name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 26px; color: var(--text); margin-bottom: 4px; }
+  .poke-id { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+  .type-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .type-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .poke-body { padding: 0 24px 24px; }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+  .stat-item { text-align: center; background: rgba(255,255,255,0.05); border-radius: 14px; padding: 10px 14px; flex: 1; margin: 0 4px; }
+  .stat-item:first-child { margin-left: 0; }
+  .stat-item:last-child { margin-right: 0; }
+  .stat-val { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px; color: var(--yellow); }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .fun-fact { background: rgba(78,205,196,0.1); border: 1.5px solid rgba(78,205,196,0.2); border-radius: 16px; padding: 14px 16px; font-size: 15px; line-height: 1.6; color: var(--text); margin-bottom: 16px; }
+  .fun-fact-label { font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+
+  /* ---- TYPE GLOW ---- */
+  .poke-card[data-type="fire"] { border-color: rgba(255,107,0,0.3); box-shadow: 0 8px 40px rgba(255,107,0,0.2), inset 0 0 60px rgba(255,107,0,0.05); }
+  .poke-card[data-type="fire"] .poke-header { background: linear-gradient(135deg, rgba(255,107,0,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="water"] { border-color: rgba(78,145,205,0.3); box-shadow: 0 8px 40px rgba(78,145,205,0.2), inset 0 0 60px rgba(78,145,205,0.05); }
+  .poke-card[data-type="water"] .poke-header { background: linear-gradient(135deg, rgba(78,145,205,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="grass"] { border-color: rgba(107,203,119,0.3); box-shadow: 0 8px 40px rgba(107,203,119,0.2), inset 0 0 60px rgba(107,203,119,0.05); }
+  .poke-card[data-type="grass"] .poke-header { background: linear-gradient(135deg, rgba(107,203,119,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="electric"] { border-color: rgba(255,217,61,0.3); box-shadow: 0 8px 40px rgba(255,217,61,0.25), inset 0 0 60px rgba(255,217,61,0.05); }
+  .poke-card[data-type="electric"] .poke-header { background: linear-gradient(135deg, rgba(255,217,61,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="psychic"] { border-color: rgba(255,107,107,0.3); box-shadow: 0 8px 40px rgba(255,107,107,0.2), inset 0 0 60px rgba(255,107,107,0.05); }
+  .poke-card[data-type="psychic"] .poke-header { background: linear-gradient(135deg, rgba(255,107,107,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="ice"] { border-color: rgba(150,217,255,0.3); box-shadow: 0 8px 40px rgba(150,217,255,0.2), inset 0 0 60px rgba(150,217,255,0.05); }
+  .poke-card[data-type="ice"] .poke-header { background: linear-gradient(135deg, rgba(150,217,255,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="dragon"] { border-color: rgba(100,100,255,0.3); box-shadow: 0 8px 40px rgba(100,100,255,0.25), inset 0 0 60px rgba(100,100,255,0.05); }
+  .poke-card[data-type="dragon"] .poke-header { background: linear-gradient(135deg, rgba(100,100,255,0.15) 0%, transparent 60%); }
+  .poke-card[data-type="dark"] { border-color: rgba(80,60,50,0.4); box-shadow: 0 8px 40px rgba(80,60,50,0.3), inset 0 0 60px rgba(80,60,50,0.08); }
+  .poke-card[data-type="dark"] .poke-header { background: linear-gradient(135deg, rgba(80,60,50,0.15) 0%, transparent 60%); }
+  .poke-card[data-type="fairy"] { border-color: rgba(255,150,200,0.3); box-shadow: 0 8px 40px rgba(255,150,200,0.2), inset 0 0 60px rgba(255,150,200,0.05); }
+  .poke-card[data-type="fairy"] .poke-header { background: linear-gradient(135deg, rgba(255,150,200,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="normal"] { border-color: rgba(180,180,180,0.2); box-shadow: 0 8px 40px rgba(180,180,180,0.1); }
+  .poke-card[data-type="fighting"] { border-color: rgba(200,80,60,0.3); box-shadow: 0 8px 40px rgba(200,80,60,0.2), inset 0 0 60px rgba(200,80,60,0.05); }
+  .poke-card[data-type="fighting"] .poke-header { background: linear-gradient(135deg, rgba(200,80,60,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="poison"] { border-color: rgba(160,80,200,0.3); box-shadow: 0 8px 40px rgba(160,80,200,0.2), inset 0 0 60px rgba(160,80,200,0.05); }
+  .poke-card[data-type="poison"] .poke-header { background: linear-gradient(135deg, rgba(160,80,200,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="ground"] { border-color: rgba(200,160,80,0.3); box-shadow: 0 8px 40px rgba(200,160,80,0.2), inset 0 0 60px rgba(200,160,80,0.05); }
+  .poke-card[data-type="ground"] .poke-header { background: linear-gradient(135deg, rgba(200,160,80,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="flying"] { border-color: rgba(100,160,220,0.3); box-shadow: 0 8px 40px rgba(100,160,220,0.2), inset 0 0 60px rgba(100,160,220,0.05); }
+  .poke-card[data-type="flying"] .poke-header { background: linear-gradient(135deg, rgba(100,160,220,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="bug"] { border-color: rgba(100,180,60,0.3); box-shadow: 0 8px 40px rgba(100,180,60,0.2), inset 0 0 60px rgba(100,180,60,0.05); }
+  .poke-card[data-type="bug"] .poke-header { background: linear-gradient(135deg, rgba(100,180,60,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="rock"] { border-color: rgba(160,140,80,0.3); box-shadow: 0 8px 40px rgba(160,140,80,0.2), inset 0 0 60px rgba(160,140,80,0.05); }
+  .poke-card[data-type="rock"] .poke-header { background: linear-gradient(135deg, rgba(160,140,80,0.12) 0%, transparent 60%); }
+  .poke-card[data-type="ghost"] { border-color: rgba(100,80,160,0.3); box-shadow: 0 8px 40px rgba(100,80,160,0.25), inset 0 0 60px rgba(100,80,160,0.05); }
+  .poke-card[data-type="ghost"] .poke-header { background: linear-gradient(135deg, rgba(100,80,160,0.15) 0%, transparent 60%); }
+  .poke-card[data-type="steel"] { border-color: rgba(160,160,180,0.3); box-shadow: 0 8px 40px rgba(160,160,180,0.15), inset 0 0 60px rgba(160,160,180,0.05); }
+  .poke-card[data-type="steel"] .poke-header { background: linear-gradient(135deg, rgba(160,160,180,0.1) 0%, transparent 60%); }
+
+  /* ---- COLLECTION ---- */
+  .coll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 420px; }
+  .coll-item {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 12px 8px;
+    text-align: center;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: pop 0.3s ease;
+  }
+  .coll-img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
+  .coll-name { font-size: 12px; font-weight: 700; color: var(--text2); margin-top: 4px; }
+  .empty-coll { text-align: center; color: var(--text2); font-size: 15px; line-height: 1.8; padding: 40px 20px; }
+  .coll-count { background: var(--yellow); color: #1a1a2e; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; }
+
+  /* ---- POKEBALL CATCH ANIMATION ---- */
+  .result-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(26,26,46,0.97);
+    animation: fade-in 0.3s ease;
+    padding: 24px;
+    overflow: hidden;
+  }
+  @keyframes fade-in { from{opacity:0} to{opacity:1} }
+
+  .catch-pokeball {
+    width: 120px; height: 120px; border-radius: 50%; position: relative;
+    animation: ball-drop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .catch-pokeball .ball-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: #FF6B6B; border-radius: 60px 60px 0 0;
+    transform-origin: bottom center;
+    animation: ball-open-top 0.5s ease 1.0s forwards;
+  }
+  .catch-pokeball .ball-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+    background: #f0f0f0; border-radius: 0 0 60px 60px;
+    transform-origin: top center;
+    animation: ball-open-bottom 0.5s ease 1.0s forwards;
+  }
+  .catch-pokeball .ball-stripe {
+    position: absolute; top: 50%; left: 0; right: 0; height: 8px;
+    background: #1a1a2e; transform: translateY(-50%); z-index: 2;
+    animation: ball-stripe-fade 0.3s ease 1.0s forwards;
+  }
+  .catch-pokeball .ball-btn {
+    position: absolute; top: 50%; left: 50%; width: 28px; height: 28px;
+    background: white; border: 5px solid #1a1a2e; border-radius: 50%;
+    transform: translate(-50%, -50%); z-index: 3;
+    animation: ball-btn-flash 0.4s ease 0.8s forwards;
+  }
+
+  @keyframes ball-drop {
+    0% { transform: translateY(-200px) rotate(-20deg); opacity: 0; }
+    60% { transform: translateY(20px) rotate(5deg); opacity: 1; }
+    80% { transform: translateY(-8px) rotate(-2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+  @keyframes ball-btn-flash {
+    0% { background: white; box-shadow: none; }
+    50% { background: var(--yellow); box-shadow: 0 0 30px var(--yellow); }
+    100% { background: var(--yellow); box-shadow: 0 0 20px var(--yellow); }
+  }
+  @keyframes ball-open-top {
+    0% { transform: rotateX(0); }
+    100% { transform: rotateX(-120deg); opacity: 0; }
+  }
+  @keyframes ball-open-bottom {
+    0% { transform: rotateX(0); }
+    100% { transform: rotateX(120deg); opacity: 0; }
+  }
+  @keyframes ball-stripe-fade {
+    to { opacity: 0; }
+  }
+
+  /* Flash of light when ball opens */
+  .catch-flash {
+    position: absolute; width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,217,61,0.6) 30%, transparent 70%);
+    opacity: 0; animation: flash-burst 0.8s ease 1.2s forwards;
+    pointer-events: none;
+  }
+  @keyframes flash-burst {
+    0% { transform: scale(0.2); opacity: 0; }
+    30% { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  /* Sparkles around the reveal */
+  .catch-sparkles { position: absolute; width: 250px; height: 250px; pointer-events: none; }
+  .sparkle {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    opacity: 0; animation: sparkle-fly 1s ease forwards;
+  }
+  @keyframes sparkle-fly {
+    0% { transform: translate(0,0) scale(0); opacity: 0; }
+    20% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; }
+  }
+
+  /* Pokemon reveal after ball opens */
+  .catch-pokemon-reveal {
+    position: absolute; opacity: 0;
+    animation: poke-reveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 1.5s forwards;
+  }
+  .catch-pokemon-reveal img { width: 160px; height: 160px; object-fit: contain; filter: drop-shadow(0 0 30px rgba(255,217,61,0.5)); }
+  @keyframes poke-reveal {
+    0% { transform: scale(0.3); opacity: 0; filter: brightness(3); }
+    50% { filter: brightness(1.5); }
+    100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+  }
+
+  .result-text { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 28px; text-align: center; opacity: 0; animation: text-appear 0.4s ease 2.0s forwards; }
+  .result-sub { font-size: 16px; color: var(--text2); text-align: center; opacity: 0; animation: text-appear 0.4s ease 2.2s forwards; }
+  @keyframes text-appear { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ---- LOADER ---- */
+  .loader { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 40px; }
+  .pokeball-spin { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(180deg, #FF6B6B 0%, #FF6B6B 47%, #fff 47%, #fff 53%, #1a1a2e 53%); animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text { font-size: 16px; color: var(--text2); font-weight: 600; }
+
+  /* type colors */
+  .t-fire { background: rgba(255,107,0,0.25); color: #ff6b00; }
+  .t-water { background: rgba(78,145,205,0.25); color: #4e91cd; }
+  .t-grass { background: rgba(107,203,119,0.25); color: #6bcb77; }
+  .t-electric { background: rgba(255,217,61,0.25); color: #ffd93d; }
+  .t-psychic { background: rgba(255,107,107,0.25); color: #ff6b6b; }
+  .t-ice { background: rgba(150,217,255,0.25); color: #96d9ff; }
+  .t-dragon { background: rgba(100,100,255,0.25); color: #8888ff; }
+  .t-dark { background: rgba(80,60,50,0.4); color: #b8a898; }
+  .t-fairy { background: rgba(255,150,200,0.25); color: #ff96c8; }
+  .t-normal { background: rgba(180,180,180,0.2); color: #aaa; }
+  .t-fighting { background: rgba(200,80,60,0.25); color: #c8503c; }
+  .t-poison { background: rgba(160,80,200,0.25); color: #a050c8; }
+  .t-ground { background: rgba(200,160,80,0.25); color: #c8a050; }
+  .t-flying { background: rgba(100,160,220,0.25); color: #64a0dc; }
+  .t-bug { background: rgba(100,180,60,0.25); color: #64b43c; }
+  .t-rock { background: rgba(160,140,80,0.25); color: #a08c50; }
+  .t-ghost { background: rgba(100,80,160,0.25); color: #6450a0; }
+  .t-steel { background: rgba(160,160,180,0.25); color: #a0a0b4; }
+
+  .divider-line { width: 100%; max-width: 380px; height: 1px; background: rgba(255,255,255,0.08); margin: 20px 0; }
+
+  /* nav dots */
+  .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+  .nav-tab { padding: 8px 18px; border-radius: 20px; border: none; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; background: rgba(255,255,255,0.07); color: var(--text2); transition: all 0.15s; }
+  .nav-tab.active { background: var(--yellow); color: #1a1a2e; }
+
+  .error-msg { font-size: 15px; color: var(--red); text-align: center; padding: 12px; }
+
+  /* ---- SCAN ---- */
+  .scan-area {
+    width: 100%; max-width: 300px;
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; margin: 20px 0;
+  }
+  .scan-pokeball {
+    width: 180px; height: 180px; border-radius: 50%; position: relative;
+    box-shadow: 0 8px 40px rgba(255,107,107,0.3);
+    animation: float 3s ease-in-out infinite;
+    overflow: hidden;
+  }
+  .scan-pokeball-top { position: absolute; top: 0; left: 0; right: 0; height: 50%; background: #FF6B6B; }
+  .scan-pokeball-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: #f0f0f0; }
+  .scan-pokeball-stripe { position: absolute; top: 50%; left: 0; right: 0; height: 8px; background: #1a1a2e; transform: translateY(-50%); z-index: 2; }
+  .scan-pokeball-btn-ring {
+    position: absolute; top: 50%; left: 50%; width: 56px; height: 56px;
+    background: white; border: 6px solid #1a1a2e; border-radius: 50%;
+    transform: translate(-50%, -50%); z-index: 3;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .scan-label { font-size: 15px; color: var(--text2); margin-top: 16px; font-weight: 600; text-align: center; }
+  .scan-area:active .scan-pokeball { transform: scale(0.93); }
+
+  .scan-preview { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 380px; animation: slide-up 0.3s ease; }
+  .scan-status { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; color: var(--yellow); text-align: center; }
+  .scan-status.error { color: var(--red); }
+  .scan-status.success { color: var(--green); }
+
+  /* ---- MANUAL SEARCH MODAL ---- */
+  .manual-search-overlay {
+    position: fixed; inset: 0; z-index: 300; background: rgba(26,26,46,0.95);
+    display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px;
+  }
+  .manual-search-overlay.active { display: flex; }
+  .manual-search-box {
+    background: var(--card); border-radius: var(--radius); padding: 28px 24px;
+    width: 100%; max-width: 380px; border: 1.5px solid rgba(255,255,255,0.1); animation: slide-up 0.3s ease;
+  }
+
+  /* ---- SPELLING MODE ---- */
+  .spell-silhouette { width: 120px; height: 120px; margin-bottom: 16px; filter: brightness(0) invert(0.3); transition: filter 0.5s; }
+  .spell-silhouette.revealed { filter: none; }
+  .spell-listen-btn { background: rgba(167,139,250,0.15); border: 1.5px solid rgba(167,139,250,0.3); border-radius: 50%; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 32px; cursor: pointer; transition: all 0.15s; margin-bottom: 24px; color: var(--purple); }
+  .spell-listen-btn:active { transform: scale(0.93); background: rgba(167,139,250,0.25); }
+  .spell-listen-btn.playing { animation: pulse-purple 1s ease infinite; }
+  @keyframes pulse-purple { 0%,100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.4); } 50% { box-shadow: 0 0 0 16px rgba(167,139,250,0); } }
+  .spell-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; }
+  .spell-opt {
+    padding: 16px 12px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.07); color: var(--text);
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px;
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .spell-opt:active { transform: scale(0.97); }
+  .spell-opt.correct { background: var(--green); color: #1a1a2e; border-color: var(--green); }
+  .spell-opt.wrong { background: var(--red); color: white; border-color: var(--red); animation: shake 0.4s ease; }
+  .spell-hint { font-size: 14px; color: var(--text2); margin-top: 16px; text-align: center; }
+
+  /* ---- ACHIEVEMENTS ---- */
+  .ach-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 420px; }
+  .ach-item { background: var(--card); border-radius: 18px; padding: 16px 14px; text-align: center; border: 1.5px solid rgba(255,255,255,0.08); transition: all 0.15s; }
+  .ach-item.unlocked { border-color: rgba(255,217,61,0.3); box-shadow: 0 4px 20px rgba(255,217,61,0.1); }
+  .ach-item.locked { opacity: 0.4; filter: grayscale(1); }
+  .ach-icon { font-size: 36px; margin-bottom: 8px; }
+  .ach-name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+  .ach-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+  .ach-item.unlocked .ach-name { color: var(--yellow); }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+    background: var(--card); border: 1.5px solid rgba(255,217,61,0.3);
+    border-radius: 16px; padding: 12px 20px; z-index: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    animation: toast-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    max-width: 340px;
+  }
+  .toast.hide { animation: toast-out 0.3s ease forwards; }
+  .toast-icon { font-size: 28px; }
+  .toast-text { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: var(--yellow); }
+  .toast-sub { font-size: 12px; color: var(--text2); font-weight: 600; }
+  @keyframes toast-in { to { transform: translateX(-50%) translateY(0); } }
+  @keyframes toast-out { to { transform: translateX(-50%) translateY(-100px); opacity: 0; } }
+
+  /* ---- SETTINGS MODAL ---- */
+  .settings-btn { position: fixed; top: 16px; right: 16px; z-index: 50; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 14px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--text2); transition: all 0.15s; }
+  .settings-btn:active { transform: scale(0.93); }
+  .settings-btn.configured { border-color: var(--green); color: var(--green); }
+  .settings-overlay { position: fixed; inset: 0; z-index: 600; background: rgba(26,26,46,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .settings-overlay.active { display: flex; }
+  .settings-box { background: var(--card); border-radius: var(--radius); padding: 28px 24px; width: 100%; max-width: 380px; border: 1.5px solid rgba(255,255,255,0.1); animation: slide-up 0.3s ease; }
+  .settings-field { margin-bottom: 16px; }
+  .settings-label { font-size: 13px; color: var(--text2); margin-bottom: 6px; font-weight: 600; }
+  .settings-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.06); color: var(--text); font-size: 14px; font-family: 'Nunito Sans', sans-serif; outline: none; }
+  .settings-input:focus { border-color: var(--yellow); }
+  .settings-btns { display: flex; gap: 10px; margin-top: 20px; }
+  .settings-btns button { flex: 1; padding: 14px; border-radius: 16px; border: none; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px; }
+  .settings-save { background: var(--green); color: #1a1a2e; }
+  .settings-cancel { background: rgba(255,255,255,0.08); color: var(--text2); }
+  .settings-hint { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  /* ---- COLORING ---- */
+  .color-canvas-wrap { background: white; border-radius: 16px; padding: 8px; margin: 12px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .color-canvas { display: block; border-radius: 12px; touch-action: none; image-rendering: pixelated; }
+  .color-palette { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 16px 0; max-width: 380px; }
+  .color-swatch {
+    width: 40px; height: 40px; border-radius: 50%; border: 3px solid transparent;
+    cursor: pointer; transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .color-swatch:active { transform: scale(0.9); }
+  .color-swatch.selected { border-color: white; transform: scale(1.15); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .color-btns { display: flex; gap: 10px; width: 100%; max-width: 380px; }
+  .color-btns button { flex: 1; padding: 12px; border-radius: 14px; border: none; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; transition: transform 0.15s; }
+  .color-btns button:active { transform: scale(0.97); }
+  .color-name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; color: var(--yellow); margin-bottom: 4px; }
+  .color-reload { background: rgba(255,255,255,0.08); color: var(--text2); }
+  .color-clear { background: rgba(255,107,107,0.2); color: var(--red); }
+  .color-save { background: var(--green); color: #1a1a2e; }
+
+  /* ---- WHO'S THAT POKEMON ---- */
+  .wtp-silhouette { width: 200px; height: 200px; object-fit: contain; filter: brightness(0); transition: filter 0.6s ease; margin: 20px 0; image-rendering: pixelated; }
+  .wtp-silhouette.revealed { filter: none; }
+  .wtp-question { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px; color: var(--yellow); margin-bottom: 20px; text-align: center; }
+  .wtp-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; }
+  .wtp-opt { padding: 14px 12px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.07); color: var(--text); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .wtp-opt:active { transform: scale(0.97); }
+  .wtp-opt.correct { background: var(--green); color: #1a1a2e; border-color: var(--green); }
+  .wtp-opt.wrong { background: var(--red); color: white; border-color: var(--red); animation: shake 0.4s ease; }
+  .wtp-result { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; margin-top: 16px; text-align: center; }
+
+  /* ---- LEVEL SELECTOR ---- */
+  .level-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(26,26,46,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .level-overlay.active { display: flex; }
+  .level-box { background: var(--card); border-radius: var(--radius); padding: 28px 24px; width: 100%; max-width: 380px; border: 1.5px solid rgba(255,255,255,0.1); animation: slide-up 0.3s ease; }
+  .level-opt { width: 100%; padding: 16px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; transition: all 0.15s; text-align: left; }
+  .level-opt:active { transform: scale(0.97); }
+  .level-opt.locked { opacity: 0.35; pointer-events: none; }
+  .level-opt.selected { border-color: var(--yellow); background: rgba(255,217,61,0.1); }
+  .level-icon { font-size: 24px; flex-shrink: 0; }
+  .level-info { flex: 1; }
+  .level-name { font-size: 16px; }
+  .level-desc { font-size: 12px; color: var(--text2); font-weight: 600; margin-top: 2px; }
+  .level-lock { font-size: 14px; color: var(--text2); }
+  .math-level-badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 10px; font-weight: 700; margin-bottom: 12px; }
+  .math-level-badge.easy { background: rgba(107,203,119,0.2); color: var(--green); }
+  .math-level-badge.medium { background: rgba(255,217,61,0.2); color: var(--yellow); }
+  .math-level-badge.hard { background: rgba(255,107,107,0.2); color: var(--red); }
+
+  /* ---- SPLASH SCREEN ---- */
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.5s;
+  }
+  #splash.hide { opacity: 0; pointer-events: none; }
+  .splash-ball {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: linear-gradient(180deg, #FF6B6B 0%, #FF6B6B 47%, #fff 47%, #fff 53%, #1a1a2e 53%);
+    border: 4px solid rgba(255,255,255,0.15);
+    animation: splash-spin 1s ease-in-out forwards;
+    position: relative; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+  }
+  .splash-ball-center { width: 22px; height: 22px; border-radius: 50%; background: white; border: 4px solid rgba(255,255,255,0.3); }
+  .splash-title {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 36px;
+    color: var(--yellow); opacity: 0;
+    animation: splash-text 0.5s ease 0.8s forwards;
+    text-shadow: 0 4px 20px rgba(255,217,61,0.4);
+  }
+  .splash-sub {
+    font-size: 14px; color: var(--text2); opacity: 0;
+    animation: splash-text 0.5s ease 1.1s forwards;
+  }
+  @keyframes splash-spin {
+    0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+    50% { transform: rotate(360deg) scale(1.2); opacity: 1; }
+    100% { transform: rotate(720deg) scale(1); opacity: 1; }
+  }
+  @keyframes splash-text { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ---- SPEAK BUTTON ---- */
+  .speak-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(167,139,250,0.15); border: 1.5px solid rgba(167,139,250,0.3); border-radius: 16px; padding: 10px 18px; color: var(--purple); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.15s; margin-top: 12px; width: 100%; justify-content: center; }
+  .speak-btn:active { transform: scale(0.97); background: rgba(167,139,250,0.25); }
+  .speak-btn.loading { opacity: 0.6; pointer-events: none; }
+  .speak-btn.playing { background: rgba(167,139,250,0.25); border-color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<!-- SETTINGS BUTTON -->
+<button class="settings-btn" id="settings-btn" onclick="openSettings()">⚙️</button>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-box">
+    <div class="screen-title" style="margin-bottom:4px;">⚙️ Настройки</div>
+    <div class="screen-hint" style="margin-bottom:16px;">API ключи сохраняются на устройстве</div>
+    <div class="settings-field">
+      <div class="settings-label">Anthropic API Key (для сканирования и фактов)</div>
+      <input class="settings-input" id="set-anthropic" type="password" placeholder="sk-ant-..." autocomplete="off">
+      <div class="settings-hint">console.anthropic.com → API Keys</div>
+    </div>
+    <div class="settings-field">
+      <div class="settings-label">ElevenLabs API Key (для озвучки)</div>
+      <input class="settings-input" id="set-elevenlabs" type="password" placeholder="sk_..." autocomplete="off">
+      <div class="settings-hint">elevenlabs.io → Developers → API Keys</div>
+    </div>
+    <div class="settings-btns">
+      <button class="settings-cancel" onclick="closeSettings()">Отмена</button>
+      <button class="settings-save" onclick="saveSettings()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-ball"><div class="splash-ball-center"></div></div>
+  <div class="splash-title">⚡ ПокеСкан</div>
+  <div class="splash-sub">Учись и собирай покемонов!</div>
+</div>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;">
+    <div class="home-logo">⚡ ПокеСкан</div>
+    <div class="home-sub">Учись и собирай покемонов!</div>
+    <div class="pokedex-progress" id="pokedex-progress">
+      <div class="pokedex-label">Покедекс: <strong id="pokedex-count">0</strong> из <strong>151</strong></div>
+      <div class="pokedex-bar"><div class="pokedex-fill" id="pokedex-fill" style="width:0%"></div></div>
+    </div>
+    <div class="pokeball-big" onclick="openCamera()">
+      <div class="pokeball-center"></div>
+    </div>
+    <button class="btn-main btn-yellow" onclick="openCamera()">
+      📷 Сканировать покемона
+    </button>
+    <button class="btn-main btn-blue" onclick="goTo('screen-collection')">
+      📚 Моя коллекция
+    </button>
+    <button class="btn-main btn-green" onclick="startSpelling()">
+      📖 Учись читать
+    </button>
+    <button class="btn-main btn-red" onclick="startWhosThat()">
+      ❓ Кто этот покемон?
+    </button>
+    <button class="btn-main" onclick="startColoring()" style="margin-top:12px; background:linear-gradient(90deg,#FF6B6B,#FFD93D,#6BCB77,#4ECDC4,#A78BFA); color:#1a1a2e;">
+      🎨 Раскраска
+    </button>
+    <button class="btn-main btn-purple" onclick="goTo('screen-achievements')">
+      🏆 Достижения
+    </button>
+  </div>
+  <div style="font-size:12px; color:rgba(255,255,255,0.15); margin-top:16px;">для Кирилла-младшего ⭐</div>
+</div>
+
+<!-- CAMERA / SCAN -->
+<div class="screen" id="screen-camera">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">📷 Сканируй карточку</div>
+  <div class="screen-hint">Сфотографируй карточку покемона<br>и я определю кто это!</div>
+
+  <div class="scan-area" id="scan-area">
+    <div class="scan-pokeball">
+      <div class="scan-pokeball-top"></div>
+      <div class="scan-pokeball-stripe"></div>
+      <div class="scan-pokeball-btn-ring">📷</div>
+      <div class="scan-pokeball-bottom"></div>
+    </div>
+    <div class="scan-label">Нажми чтобы сфотографировать</div>
+    <input type="file" accept="image/*" capture="environment" id="camera-input" style="display:none" onchange="onPhotoTaken(event)">
+  </div>
+
+  <div class="scan-preview" id="scan-preview" style="display:none">
+    <img id="scan-preview-img" src="data:," alt="" style="width:100%; max-width:300px; border-radius:16px; margin-bottom:16px;">
+    <div id="scan-status" class="scan-status">Распознаю покемона...</div>
+  </div>
+
+  <div style="margin-top:auto; width:100%; max-width:380px;">
+    <button class="btn-main" onclick="openManualSearch()" style="max-width:380px; width:100%; background:rgba(255,255,255,0.08); color:var(--text2); font-size:16px;">
+      ⌨ Ввести имя вручную
+    </button>
+  </div>
+</div>
+
+<!-- MANUAL SEARCH (fallback) -->
+<div class="manual-search-overlay" id="manual-search">
+  <div class="manual-search-box">
+    <div class="screen-title" style="margin-bottom:8px;">Найди покемона</div>
+    <div class="screen-hint">Напиши имя на русском или английском</div>
+    <div class="search-wrap" style="max-width:100%; margin-bottom:12px;">
+      <input class="search-input" id="pokemon-input" type="text" placeholder="Пикачу..." autocomplete="off" autocorrect="off" spellcheck="false" />
+    </div>
+    <div class="suggestions" style="max-width:100%; margin-bottom:16px;">
+      <div class="sug-chip" onclick="fillName('pikachu')">Пикачу</div>
+      <div class="sug-chip" onclick="fillName('charmander')">Чармандер</div>
+      <div class="sug-chip" onclick="fillName('bulbasaur')">Бульбазавр</div>
+      <div class="sug-chip" onclick="fillName('squirtle')">Сквиртл</div>
+      <div class="sug-chip" onclick="fillName('eevee')">Иви</div>
+      <div class="sug-chip" onclick="fillName('meowth')">Мяут</div>
+    </div>
+    <div id="search-error" class="error-msg" style="display:none"></div>
+    <button class="btn-main btn-yellow" onclick="startSearch()" style="max-width:100%; width:100%;">⚡ Поехали!</button>
+    <button class="btn-main" onclick="closeManualSearch()" style="max-width:100%; width:100%; margin-top:10px; background:rgba(255,255,255,0.08); color:var(--text2); font-size:16px;">Отмена</button>
+  </div>
+</div>
+
+<!-- MATH -->
+<div class="screen" id="screen-math">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">Реши пример!</div>
+  <div class="screen-hint" id="math-hint">Правильный ответ открывает покемона 🔓</div>
+  <div class="math-card">
+    <div class="math-pokemon-name" id="math-poke-name"></div>
+    <div class="math-title">Реши пример:</div>
+    <div class="math-expr" id="math-expr"></div>
+    <div style="font-size:15px; color:var(--text2);">= ?</div>
+  </div>
+  <div class="num-grid" id="num-grid"></div>
+  <button class="check-btn" id="check-btn" onclick="checkAnswer()">Проверить ✓</button>
+</div>
+
+<!-- POKEMON INFO -->
+<div class="screen" id="screen-pokemon">
+  <button class="back-btn" onclick="openCamera()">← Ещё покемона</button>
+  <div id="poke-card-content"></div>
+  <button class="btn-main btn-yellow" onclick="goTo('screen-collection')" style="max-width:380px; margin-top:4px;">
+    📚 Посмотреть коллекцию
+  </button>
+  <button class="btn-main btn-blue" onclick="openCamera()" style="max-width:380px;">
+    📷 Сканировать ещё
+  </button>
+</div>
+
+<!-- COLLECTION -->
+<div class="screen" id="screen-collection">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">Моя коллекция</div>
+  <div id="coll-count-badge" style="margin-bottom:16px;"></div>
+  <div class="coll-grid" id="coll-grid"></div>
+</div>
+
+<!-- SPELLING -->
+<div class="screen" id="screen-spelling">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">Угадай покемона!</div>
+  <div class="screen-hint">Послушай имя и выбери правильное написание</div>
+  <img class="spell-silhouette" id="spell-img" src="data:," alt="" style="display:none">
+  <button class="spell-listen-btn" id="spell-listen-btn" onclick="spellListen()">🔊</button>
+  <div class="spell-options" id="spell-options"></div>
+  <div class="spell-hint" id="spell-hint"></div>
+</div>
+
+<!-- COLORING -->
+<div class="screen" id="screen-coloring">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">🎨 Раскраска</div>
+  <div class="color-name" id="color-poke-name"></div>
+  <div class="color-canvas-wrap">
+    <canvas class="color-canvas" id="color-canvas" width="500" height="500"></canvas>
+  </div>
+  <div class="color-palette" id="color-palette"></div>
+  <div class="color-btns">
+    <button class="color-reload" onclick="startColoring()">🔄 Другой</button>
+    <button class="color-clear" onclick="clearColoring()">🗑 Очистить</button>
+    <button class="color-save" onclick="saveColoring()">💾 Сохранить</button>
+  </div>
+</div>
+
+<!-- WHO'S THAT POKEMON -->
+<div class="screen" id="screen-whosthat">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="wtp-question">Кто этот покемон?</div>
+  <img class="wtp-silhouette" id="wtp-img" src="data:," alt="">
+  <div class="wtp-options" id="wtp-options"></div>
+  <div class="wtp-result" id="wtp-result"></div>
+</div>
+
+<!-- ACHIEVEMENTS -->
+<div class="screen" id="screen-achievements">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">🏆 Достижения</div>
+  <div class="screen-hint">Собирай покемонов и открывай награды!</div>
+  <div class="ach-grid" id="ach-grid"></div>
+</div>
+
+<!-- LEVEL SELECTOR -->
+<div class="level-overlay" id="level-overlay">
+  <div class="level-box">
+    <div class="screen-title" style="margin-bottom:8px;">Выбери уровень</div>
+    <div class="screen-hint" style="margin-bottom:16px;">Чем больше покемонов, тем сложнее примеры!</div>
+    <button class="level-opt" id="level-easy" onclick="selectLevel('easy')">
+      <div class="level-icon">🌱</div>
+      <div class="level-info"><div class="level-name">Лёгкий</div><div class="level-desc">Сложение: 5 + 3</div></div>
+    </button>
+    <button class="level-opt" id="level-medium" onclick="selectLevel('medium')">
+      <div class="level-icon">⚡</div>
+      <div class="level-info"><div class="level-name">Средний</div><div class="level-desc">Сложение и вычитание: 7 + 6 - 8</div></div>
+      <div class="level-lock" id="lock-medium"></div>
+    </button>
+    <button class="level-opt" id="level-hard" onclick="selectLevel('hard')">
+      <div class="level-icon">🔥</div>
+      <div class="level-info"><div class="level-name">Сложный</div><div class="level-desc">Умножение: 4 × 7 + 3</div></div>
+      <div class="level-lock" id="lock-hard"></div>
+    </button>
+  </div>
+</div>
+
+<!-- LOADER overlay -->
+<div id="loader" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(26,26,46,0.9); flex-direction:column; align-items:center; justify-content:center;">
+  <div class="pokeball-spin"></div>
+  <div class="loader-text" style="margin-top:20px;">Загружаю покемона...</div>
+</div>
+
+<script>
+// ---- DATA ----
+const MATH_PROBLEMS = [
+  [7,'+',6,'-',8],[15,'-',4,'+',7],[9,'+',3,'-',5],[12,'-',6,'+',8],[8,'+',5,'-',9],
+  [18,'-',9,'+',5],[10,'+',7,'-',4],[6,'+',11,'-',13],[17,'-',5,'+',4],[9,'+',10,'-',8],
+  [14,'-',6,'+',7],[8,'+',9,'-',12],[20,'-',15,'+',9],[5,'+',14,'-',10],[11,'-',3,'+',2],
+  [9,'+',8,'-',6],[13,'-',9,'+',7],[7,'+',4,'-',2],[16,'-',8,'+',5],[10,'+',6,'-',11],
+  [4,'+',15,'-',12],[19,'-',9,'+',6],[11,'+',3,'-',8],[18,'-',7,'+',3],[8,'+',10,'-',5],
+  [15,'-',6,'+',4],[9,'+',12,'-',8],[14,'-',10,'+',7],[6,'+',9,'-',3],[20,'-',15,'+',10],
+  [5,'+',14,'-',8],[12,'-',5,'+',9],[9,'+',6,'-',4],[16,'-',8,'+',11],[10,'+',5,'-',9],
+  [13,'-',6,'+',8],[7,'+',12,'-',10],[15,'-',9,'+',3],[11,'+',8,'-',7],[19,'-',11,'+',6],
+  [8,'+',10,'-',4],[17,'-',7,'+',5],[12,'+',6,'-',8],[14,'-',5,'+',9],[9,'+',11,'-',7],
+  [18,'-',6,'+',4],[7,'+',5,'-',2],[16,'-',8,'+',10],[13,'+',4,'-',9],[20,'-',9,'+',5],
+  [11,'+',8,'-',10],[12,'-',6,'+',7],[8,'+',9,'-',5],[15,'-',7,'+',3],[10,'+',5,'-',8],
+  [18,'-',9,'+',4],[7,'+',12,'-',9],[16,'-',8,'+',6],[13,'+',5,'-',11],[9,'+',10,'-',7],
+  [6,'+',9,'-',4],[14,'-',8,'+',5],[7,'+',12,'-',9],[19,'-',7,'+',8],[10,'+',6,'-',11],
+  [13,'-',5,'+',4],[15,'+',8,'-',14],[9,'-',6,'+',7],[5,'+',10,'-',8],[18,'-',9,'+',3],
+  [8,'+',11,'-',9],[16,'-',10,'+',5],[11,'+',4,'-',6],[20,'-',13,'+',7],[9,'+',15,'-',16],
+  [12,'-',5,'+',6],[8,'+',9,'-',10],[14,'-',7,'+',9],[10,'+',12,'-',11],[17,'-',6,'+',4],
+  [11,'+',9,'-',8],[13,'-',7,'+',10],[7,'+',14,'-',9],[15,'-',5,'+',8],[6,'+',10,'-',4],
+  [18,'-',8,'+',6],[12,'+',5,'-',3],[9,'-',3,'+',11],[19,'+',4,'-',13],[10,'-',6,'+',7],
+  [8,'+',15,'-',14],[14,'-',9,'+',5],[11,'+',8,'-',10],[16,'-',7,'+',8],[7,'+',13,'-',11],
+  [17,'-',9,'+',3],[9,'+',12,'-',8],[15,'-',8,'+',6],[10,'+',7,'-',5],[20,'-',10,'+',4],
+  [8,'+',9,'-',6],[13,'-',5,'+',7],[11,'+',6,'-',9],[19,'-',8,'+',6],[10,'+',14,'-',13],
+  [16,'-',11,'+',7],[12,'+',9,'-',8],[18,'-',6,'+',4],[7,'+',5,'-',3],[15,'-',10,'+',9],
+  [9,'+',8,'-',4],[14,'-',6,'+',11],[10,'+',13,'-',9],[17,'-',8,'+',5],[11,'+',5,'-',7],
+  [19,'-',10,'+',8],[8,'+',6,'-',5],[16,'-',9,'+',3],[12,'+',7,'-',6],[18,'-',7,'+',9],
+  [9,'+',10,'-',8],[15,'-',6,'+',4],[7,'+',14,'-',13],[13,'-',9,'+',8],[11,'+',4,'-',5],
+  [17,'-',8,'+',6],[10,'+',9,'-',7],[14,'-',5,'+',9],[12,'+',6,'-',8],[20,'-',11,'+',5],
+  [8,'+',10,'-',9],[16,'-',7,'+',8],[9,'+',13,'-',12],[18,'-',9,'+',7],[11,'+',5,'-',8],
+  [13,'-',6,'+',9],[7,'+',11,'-',5],[15,'-',9,'+',10],[10,'+',8,'-',4],[19,'-',8,'+',5],
+  [8,'+',9,'-',7],[17,'-',10,'+',8],[11,'+',6,'-',4],[14,'-',8,'+',9],[9,'+',12,'-',11],
+  [18,'-',9,'+',5],[10,'+',7,'-',6],[16,'-',8,'+',9],[12,'+',9,'-',10],[19,'-',11,'+',4],
+  [7,'+',10,'-',8],[13,'-',7,'+',6],[8,'+',11,'-',10],[15,'-',9,'+',5],[11,'+',9,'-',8],
+  [17,'-',7,'+',4],[9,'+',8,'-',6],[14,'-',10,'+',9],[10,'+',5,'-',4],[18,'-',8,'+',6],
+  [9,'+',3,'-',5],[12,'-',6,'+',8]
+];
+
+const TYPE_RU = {
+  fire:'огонь', water:'вода', grass:'трава', electric:'электро',
+  psychic:'психо', ice:'лёд', dragon:'дракон', dark:'тьма',
+  fairy:'фея', normal:'обычный', fighting:'борьба', poison:'яд',
+  ground:'земля', flying:'летун', bug:'жук', rock:'камень',
+  ghost:'призрак', steel:'сталь'
+};
+
+const FACTS_RU = {
+  pikachu: 'Пикачу хранит электричество в щёчках. Когда он чихает, из них вылетают искры!',
+  charmander: 'На хвосте Чармандера горит огонь. Если он потухнет — покемон заболеет.',
+  bulbasaur: 'С рождения Бульбазавр носит луковицу на спине. Со временем она вырастает в большой цветок.',
+  squirtle: 'Панцирь Сквиртла защищает его, как щит. Ещё он умеет прятаться в него!',
+  eevee: 'Иви может превратиться в 8 разных покемонов! Это зависит от камней и дружбы.',
+  meowth: 'Мяут обожает золотые монетки. Монетка на его лбу — его главное сокровище!',
+  psyduck: 'У Псидака всегда болит голова. Но именно тогда он использует телепатию!',
+  snorlax: 'Снорлакс весит 460 кг и спит по 20 часов в день. Просыпается только поесть.',
+  gengar: 'Гэнгар — тень покемона Клефэйбл. Он прячется в тени и щекочет людей.',
+  jigglypuff: 'Джиглипафф поёт так хорошо, что все вокруг засыпают. Потом он злится!'
+};
+
+// state
+let currentPokemon = null;
+let currentProblem = null;
+let correctAnswer = null;
+let selectedAnswer = null;
+let mathStartTime = 0;
+let wasLightning = false;
+let currentLevel = localStorage.getItem('pokescan_level') || 'easy';
+let streak = parseInt(localStorage.getItem('pokescan_streak') || '0');
+let collection = JSON.parse(localStorage.getItem('pokescan_collection') || '[]');
+let usedProblems = JSON.parse(localStorage.getItem('pokescan_used') || '[]');
+
+// ---- NAVIGATION ----
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+
+  if (id !== 'screen-spelling' && window.spellAudio) { spellAudio.pause(); spellAudio = null; }
+  if (id !== 'screen-pokemon' && window.currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (id === 'screen-collection') renderCollection();
+  if (id === 'screen-home') updatePokedexProgress();
+  if (id === 'screen-achievements') renderAchievements();
+}
+
+// ---- SOUNDS ----
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playCorrectSound() {
+  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+  notes.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = 0.15;
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.15 + 0.2);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + i * 0.15);
+    osc.stop(audioCtx.currentTime + i * 0.15 + 0.2);
+  });
+}
+function playWrongSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 200;
+  gain.gain.value = 0.12;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.25);
+}
+
+// ---- SCAN & RECOGNITION ----
+function getAnthropicKey() { return localStorage.getItem('pokescan_anthropic_key') || ''; }
+function getElevenlabsKey() { return localStorage.getItem('pokescan_elevenlabs_key') || ''; }
+
+function openCamera() {
+  // Reset scan screen state
+  document.getElementById('scan-area').style.display = '';
+  document.getElementById('scan-preview').style.display = 'none';
+  document.getElementById('camera-input').value = '';
+  goTo('screen-camera');
+}
+
+function stopCamera() { /* no-op, using file input */ }
+
+// Click on scan area triggers file input (native camera)
+document.addEventListener('click', e => {
+  if (e.target.closest('.scan-area')) {
+    document.getElementById('camera-input').click();
+  }
+});
+
+async function onPhotoTaken(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  // Show preview
+  const previewImg = document.getElementById('scan-preview-img');
+  const previewUrl = URL.createObjectURL(file);
+  previewImg.src = previewUrl;
+  document.getElementById('scan-area').style.display = 'none';
+  document.getElementById('scan-preview').style.display = 'flex';
+
+  const status = document.getElementById('scan-status');
+  status.textContent = '🔍 Распознаю покемона...';
+  status.className = 'scan-status';
+
+  try {
+    if (!checkKeysOnAction(true)) return;
+    // Convert to JPEG base64 via canvas (handles HEIC/HEIF from iPhone)
+    const base64 = await photoToJpegBase64(file);
+
+    // Recognize with Claude
+    const pokemonName = await recognizePokemon(base64);
+    if (!pokemonName) throw new Error('not recognized');
+
+    status.textContent = '✅ Нашёл: ' + pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1) + '!';
+    status.className = 'scan-status success';
+
+    // Fetch from PokéAPI
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+    if (!res.ok) throw new Error('not found in API');
+    const data = await res.json();
+    currentPokemon = data;
+
+    setTimeout(() => {
+      URL.revokeObjectURL(previewUrl);
+      showMath();
+    }, 1200);
+  } catch(e) {
+    status.textContent = '😕 Не удалось распознать. Попробуй ещё!';
+    status.className = 'scan-status error';
+    setTimeout(() => {
+      document.getElementById('scan-area').style.display = '';
+      document.getElementById('scan-preview').style.display = 'none';
+      document.getElementById('camera-input').value = '';
+      URL.revokeObjectURL(previewUrl);
+    }, 2000);
+  }
+}
+
+function photoToJpegBase64(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      // Resize to max 1024px for faster API call
+      const MAX = 1024;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        const scale = MAX / Math.max(w, h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      resolve(dataUrl.split(',')[1]);
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function recognizePokemon(base64) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': getAnthropicKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 50,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+          { type: 'text', text: 'This is a photo of a Pokemon trading card or Pokemon image. What Pokemon is shown? Reply with ONLY the English name in lowercase, nothing else. If you cannot identify a Pokemon, reply with "unknown".' }
+        ]
+      }]
+    })
+  });
+
+  if (!res.ok) throw new Error('API error');
+  const data = await res.json();
+  const name = data.content?.[0]?.text?.trim().toLowerCase().replace(/[^a-z-]/g, '');
+  if (!name || name === 'unknown') return null;
+  return name;
+}
+
+// ---- MANUAL SEARCH (fallback) ----
+function openManualSearch() {
+  document.getElementById('manual-search').classList.add('active');
+}
+function closeManualSearch() {
+  document.getElementById('manual-search').classList.remove('active');
+}
+function fillName(name) {
+  document.getElementById('pokemon-input').value = name;
+  document.getElementById('search-error').style.display = 'none';
+}
+
+async function startSearch() {
+  const raw = document.getElementById('pokemon-input').value.trim();
+  if (!raw) return;
+  const name = translateName(raw.toLowerCase());
+  showLoader(true);
+  document.getElementById('search-error').style.display = 'none';
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+    if (!res.ok) throw new Error('not found');
+    const data = await res.json();
+    currentPokemon = data;
+    showLoader(false);
+    closeManualSearch();
+    stopCamera();
+    showMath();
+  } catch(e) {
+    showLoader(false);
+    const err = document.getElementById('search-error');
+    err.textContent = '😕 Покемон не найден. Попробуй написать по-английски!';
+    err.style.display = 'block';
+  }
+}
+
+function translateName(n) {
+  const map = {
+    'пикачу':'pikachu','чармандер':'charmander','бульбазавр':'bulbasaur',
+    'сквиртл':'squirtle','иви':'eevee','мяут':'meowth','псидак':'psyduck',
+    'снорлакс':'snorlax','гэнгар':'gengar','джиглипафф':'jigglypuff',
+    'мьюту':'mewtwo','мью':'mew','чаризард':'charizard','бластойс':'blastoise',
+    'венузавр':'venusaur','рэйчу':'raichu','клефэйри':'clefairy','вулпикс':'vulpix',
+    'ниндок':'nidoran-f','джигглипаф':'jigglypuff','магнемайт':'magnemite',
+    'голдак':'golduck','манки':'mankey','гроулит':'growlithe','аброузабр':'arcanine',
+    'покивот':'poliwag'
+  };
+  return map[n] || n;
+}
+
+// ---- MATH ----
+function getProblem() {
+  let available = MATH_PROBLEMS.filter((_,i) => !usedProblems.includes(i));
+  if (available.length === 0) {
+    usedProblems = [];
+    localStorage.setItem('pokescan_used', '[]');
+    available = MATH_PROBLEMS;
+  }
+  const idx = MATH_PROBLEMS.indexOf(available[Math.floor(Math.random() * available.length)]);
+  usedProblems.push(idx);
+  localStorage.setItem('pokescan_used', JSON.stringify(usedProblems));
+  return MATH_PROBLEMS[idx];
+}
+
+function calcAnswer(p) {
+  let v = p[0];
+  for (let i = 1; i < p.length; i += 2) {
+    if (p[i] === '+') v += p[i+1];
+    else if (p[i] === '-') v -= p[i+1];
+    else if (p[i] === '*') v *= p[i+1];
+  }
+  return v;
+}
+
+function generateEasyProblem() {
+  const a = Math.floor(Math.random() * 9) + 1;
+  const b = Math.floor(Math.random() * 9) + 1;
+  return [a, '+', b];
+}
+
+function generateHardProblem() {
+  const a = Math.floor(Math.random() * 8) + 2;
+  const b = Math.floor(Math.random() * 8) + 2;
+  if (Math.random() < 0.5) {
+    return [a, '*', b];
+  } else {
+    const c = Math.floor(Math.random() * 9) + 1;
+    return [a, '*', b, '+', c];
+  }
+}
+
+function showMath() {
+  // Show level selector
+  const overlay = document.getElementById('level-overlay');
+  const medUnlocked = collection.length >= 10;
+  const hardUnlocked = collection.length >= 30;
+  document.getElementById('level-medium').classList.toggle('locked', !medUnlocked);
+  document.getElementById('level-hard').classList.toggle('locked', !hardUnlocked);
+  document.getElementById('lock-medium').textContent = medUnlocked ? '' : '🔒 10 покемонов';
+  document.getElementById('lock-hard').textContent = hardUnlocked ? '' : '🔒 30 покемонов';
+  document.querySelectorAll('.level-opt').forEach(o => o.classList.remove('selected'));
+  const cur = document.getElementById('level-' + currentLevel);
+  if (cur && !cur.classList.contains('locked')) cur.classList.add('selected');
+  overlay.classList.add('active');
+}
+
+function selectLevel(level) {
+  currentLevel = level;
+  localStorage.setItem('pokescan_level', level);
+  document.getElementById('level-overlay').classList.remove('active');
+  startMathRound();
+}
+
+function startMathRound() {
+  let p;
+  if (currentLevel === 'easy') p = generateEasyProblem();
+  else if (currentLevel === 'hard') p = generateHardProblem();
+  else p = getProblem();
+
+  currentProblem = p;
+  correctAnswer = calcAnswer(p);
+  selectedAnswer = null;
+
+  document.getElementById('math-poke-name').textContent = '🔒 ' + capitalize(currentPokemon.name);
+  const levelLabels = { easy: ['🌱 Лёгкий', 'easy'], medium: ['⚡ Средний', 'medium'], hard: ['🔥 Сложный', 'hard'] };
+  const [labelText, labelClass] = levelLabels[currentLevel];
+  document.getElementById('math-expr').textContent = p.map(x => x === '*' ? '×' : x).join(' ');
+
+  // generate answer choices: correct + 5 wrong
+  const choices = new Set([correctAnswer]);
+  while (choices.size < 6) {
+    const wrong = correctAnswer + Math.floor(Math.random() * 11) - 5;
+    if (wrong !== correctAnswer && wrong >= 0) choices.add(wrong);
+  }
+  const arr = [...choices].sort(() => Math.random() - 0.5);
+
+  const grid = document.getElementById('num-grid');
+  grid.innerHTML = '';
+  arr.forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn';
+    btn.textContent = n;
+    btn.onclick = () => selectAnswer(n, btn);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('check-btn').classList.remove('visible');
+  goTo('screen-math');
+  startMathTimer();
+}
+
+function startMathTimer() {
+  mathStartTime = Date.now();
+  wasLightning = false;
+}
+
+function selectAnswer(val, btn) {
+  selectedAnswer = val;
+  document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('check-btn').classList.add('visible');
+}
+
+function checkAnswer() {
+  if (selectedAnswer === null) return;
+  const btns = document.querySelectorAll('.num-btn');
+  if (selectedAnswer === correctAnswer) {
+    wasLightning = (Date.now() - mathStartTime) < 10000;
+    streak++;
+    localStorage.setItem('pokescan_streak', streak);
+    playCorrectSound();
+    btns.forEach(b => { if (parseInt(b.textContent) === correctAnswer) b.classList.add('correct'); });
+    showSuccess();
+  } else {
+    streak = 0;
+    localStorage.setItem('pokescan_streak', '0');
+    playWrongSound();
+    btns.forEach(b => { if (parseInt(b.textContent) === selectedAnswer) { b.classList.add('wrong'); b.classList.remove('selected'); } });
+    setTimeout(() => {
+      btns.forEach(b => b.classList.remove('wrong'));
+      selectedAnswer = null;
+      document.getElementById('check-btn').classList.remove('visible');
+    }, 800);
+  }
+}
+
+function showSuccess() {
+  const overlay = document.createElement('div');
+  overlay.className = 'result-overlay';
+
+  const pokeImg = currentPokemon.sprites.other?.['official-artwork']?.front_default || currentPokemon.sprites.front_default;
+
+  // Sparkles
+  const sparklesDiv = document.createElement('div');
+  sparklesDiv.className = 'catch-sparkles';
+  const sparkColors = ['#FFD93D','#FF6B6B','#4ECDC4','#6BCB77','#A78BFA','#fff'];
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    const angle = (i / 12) * Math.PI * 2;
+    const dist = 80 + Math.random() * 40;
+    const x = Math.cos(angle) * dist + 125;
+    const y = Math.sin(angle) * dist + 125;
+    s.style.left = x + 'px';
+    s.style.top = y + 'px';
+    s.style.background = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+    s.style.animationDelay = (1.3 + Math.random() * 0.4) + 's';
+    s.style.width = (4 + Math.random() * 6) + 'px';
+    s.style.height = s.style.width;
+    s.style.boxShadow = `0 0 8px ${s.style.background}`;
+    sparklesDiv.appendChild(s);
+  }
+
+  overlay.innerHTML = `
+    <div class="catch-pokeball">
+      <div class="ball-top"></div>
+      <div class="ball-stripe"></div>
+      <div class="ball-btn"></div>
+      <div class="ball-bottom"></div>
+    </div>
+    <div class="catch-flash"></div>
+    <div class="catch-pokemon-reveal">
+      <img src="${pokeImg}" alt="${currentPokemon.name}">
+    </div>
+    <div class="result-text" style="color:var(--yellow)">Поймал!</div>
+    <div class="result-sub">${capitalize(currentPokemon.name)} добавлен в коллекцию!</div>
+  `;
+
+  overlay.appendChild(sparklesDiv);
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    overlay.remove();
+    showPokemon();
+  }, 3200);
+}
+
+// ---- POKEMON ----
+function showPokemon() {
+  const p = currentPokemon;
+  const name = capitalize(p.name);
+  const animatedSprite = p.sprites?.versions?.['generation-v']?.['black-white']?.animated?.front_default;
+  const staticImg = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default;
+  const img = staticImg; // official artwork for card header
+  const cardSprite = animatedSprite || staticImg; // animated if available
+  const types = p.types.map(t => t.type.name);
+  const height = (p.height / 10).toFixed(1);
+  const weight = (p.weight / 10).toFixed(1);
+  const hp = p.stats.find(s => s.stat.name === 'hp')?.base_stat || '?';
+
+  // Play pokemon cry
+  const cryUrl = p.cries?.latest || p.cries?.legacy;
+  if (cryUrl) {
+    try {
+      const cry = new Audio(cryUrl);
+      cry.volume = 0.4;
+      cry.play().catch(() => {});
+    } catch(e) {}
+  }
+
+  const typeBadges = types.map(t => {
+    const ru = TYPE_RU[t] || t;
+    return `<span class="type-badge t-${t}">${ru}</span>`;
+  }).join('');
+
+  let fact = FACTS_RU[p.name] || getFallbackFact(p);
+
+  document.getElementById('poke-card-content').innerHTML = `
+    <div class="poke-card" data-type="${types[0]}" id="poke-card-tilt">
+      <div class="tilt-shine"></div>
+      <div class="poke-header">
+        <div class="poke-img-wrap">
+          <img class="poke-img" src="${cardSprite}" alt="${name}" loading="lazy" style="${animatedSprite ? 'image-rendering:pixelated; width:120%; height:120%;' : ''}">
+        </div>
+        <div class="poke-info">
+          <div class="poke-name">${name}</div>
+          <div class="poke-id">#${String(p.id).padStart(3,'0')}</div>
+          <div class="type-badges">${typeBadges}</div>
+          ${wasLightning ? '<div class="lightning-badge">⚡ Молниеносный!</div>' : ''}
+        </div>
+      </div>
+      <div class="poke-body">
+        <div class="stat-row">
+          <div class="stat-item"><div class="stat-val">${hp}</div><div class="stat-label">HP</div></div>
+          <div class="stat-item"><div class="stat-val">${height}м</div><div class="stat-label">Рост</div></div>
+          <div class="stat-item"><div class="stat-val">${weight}кг</div><div class="stat-label">Вес</div></div>
+        </div>
+        <div class="fun-fact">
+          <div class="fun-fact-label">⭐ Интересный факт</div>
+          ${fact}
+        </div>
+        <button class="speak-btn" id="speak-btn" onclick="speakPokemon()">
+          🔊 Послушать
+        </button>
+      </div>
+    </div>
+  `;
+
+  // save to collection
+  if (!collection.find(c => c.id === p.id)) {
+    collection.push({ id: p.id, name: p.name, img: staticImg, types });
+    localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+  }
+
+  goTo('screen-pokemon');
+
+  // Generate AI fact if no custom one exists
+  if (!FACTS_RU[p.name]) {
+    generateAIFact(p.name, name, types, hp, height, weight);
+  }
+}
+
+async function generateAIFact(engName, ruName, types, hp, height, weight) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getAnthropicKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: `Напиши 2-3 коротких интересных факта про покемона ${ruName} (${engName}) для ребёнка 6 лет. Типы: ${types.join(', ')}. HP: ${hp}, рост: ${height}м, вес: ${weight}кг. Пиши простым весёлым языком на русском. Максимум 3 предложения. Без заголовков, без списков, просто сплошной текст. Обязательно заканчивай последнее предложение точкой или восклицательным знаком.`
+        }]
+      })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const aiFact = data.content?.[0]?.text?.trim();
+    if (!aiFact) return;
+
+    // Cache for this session
+    FACTS_RU[engName] = aiFact;
+
+    // Update the card if still on pokemon screen
+    const factEl = document.querySelector('.fun-fact');
+    if (factEl) {
+      factEl.innerHTML = `<div class="fun-fact-label">⭐ Интересный факт</div>${aiFact}`;
+    }
+
+    // Update speech text
+    currentSpeechText = `${ruName}! ${aiFact}`;
+  } catch(e) {
+    // silently fail, keep generic fact
+  }
+}
+
+function getFallbackFact(p) {
+  const type = p.types[0]?.type.name;
+  const facts = {
+    fire: 'Этот огненный покемон умеет дышать пламенем! С ним нужно быть осторожным.',
+    water: 'Этот водный покемон отлично плавает и может обливать противников струёй воды.',
+    grass: 'Этот покемон дружит с растениями и умеет лечиться на солнышке.',
+    electric: 'Этот электрический покемон может зарядить телефон одним разрядом!',
+    psychic: 'Этот покемон умеет читать мысли и двигать предметы силой разума.',
+    ice: 'Этот ледяной покемон не мёрзнет даже в самый сильный мороз.',
+    dragon: 'Это очень редкий и сильный покемон-дракон. Его уважают все тренеры!',
+    normal: 'Этот покемон кажется простым, но скрывает много сюрпризов!',
+    default: 'Этот покемон очень особенный. Береги его в своей коллекции!'
+  };
+  return facts[type] || facts.default;
+}
+
+// ---- COLLECTION ----
+function renderCollection() {
+  const grid = document.getElementById('coll-grid');
+  const badge = document.getElementById('coll-count-badge');
+  if (collection.length === 0) {
+    badge.innerHTML = '';
+    grid.innerHTML = '<div class="empty-coll">Коллекция пустая 😴<br><br>Найди покемона и реши<br>пример, чтобы добавить!</div>';
+    return;
+  }
+  badge.innerHTML = `<span class="coll-count">⭐ Поймано: ${collection.length}</span>`;
+  grid.innerHTML = collection.map(c => `
+    <div class="coll-item">
+      <img class="coll-img" src="${c.img}" alt="${c.name}">
+      <div class="coll-name">${capitalize(c.name)}</div>
+    </div>
+  `).join('');
+}
+
+// ---- UTILS ----
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function showLoader(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+
+function updatePokedexProgress() {
+  const count = collection.length;
+  document.getElementById('pokedex-count').textContent = count;
+  document.getElementById('pokedex-fill').style.width = Math.min(100, (count / 151) * 100).toFixed(1) + '%';
+}
+
+// enter key on search
+document.getElementById('pokemon-input').addEventListener('keydown', e => { if (e.key === 'Enter') startSearch(); });
+
+
+// ---- ELEVENLABS TTS ----
+const ELEVENLABS_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — multilingual, warm female voice
+var currentAudio = null;
+var currentSpeechText = '';
+
+// ---- COLORING ----
+const COLOR_PALETTE = ['#FF3B30','#FF9500','#FFD93D','#34C759','#5AC8FA','#007AFF','#AF52DE','#FF2D55','#8B4513','#000000'];
+let colorSelected = '#FF3B30';
+let colorOriginalData = null;
+
+const COLORING_PAGES = [
+  { name: 'Pikachu', url: 'https://cdn.supercoloring.com/coloring/362687/pikachu-coloring-page-md.png' },
+  { name: 'Charmander', url: 'https://cdn.supercoloring.com/coloring/381825/charmander-pokemon-coloring-page-md.png' },
+  { name: 'Bulbasaur', url: 'https://cdn.supercoloring.com/coloring/362696/bulbasaur-coloring-page-md.png' },
+  { name: 'Squirtle', url: 'https://cdn.supercoloring.com/coloring/361898/007-squirtle-coloring-page-md.png' },
+  { name: 'Eevee', url: 'https://cdn.supercoloring.com/coloring/362691/eevee-coloring-page-md.png' },
+  { name: 'Meowth', url: 'https://cdn.supercoloring.com/coloring/361837/052-meowth-coloring-page-md.png' },
+  { name: 'Psyduck', url: 'https://cdn.supercoloring.com/coloring/361839/054-psyduck-coloring-page-md.png' },
+  { name: 'Snorlax', url: 'https://cdn.supercoloring.com/coloring/361766/143-snorlax-coloring-page-md.png' },
+  { name: 'Gengar', url: 'https://cdn.supercoloring.com/coloring/361797/094-gengar-coloring-page-md.png' },
+  { name: 'Charizard', url: 'https://cdn.supercoloring.com/coloring/381823/charizard-pokemon-coloring-page-md.png' },
+  { name: 'Mewtwo', url: 'https://cdn.supercoloring.com/coloring/361773/150-mewtwo-coloring-page-md.png' },
+  { name: 'Mew', url: 'https://cdn.supercoloring.com/coloring/361734/151-mew-coloring-page-md.png' },
+  { name: 'Dragonite', url: 'https://cdn.supercoloring.com/coloring/361772/149-dragonite-coloring-page-md.png' },
+  { name: 'Gyarados', url: 'https://cdn.supercoloring.com/coloring/361793/130-gyarados-coloring-page-md.png' },
+  { name: 'Arcanine', url: 'https://cdn.supercoloring.com/coloring/344361/059-arcanine-coloring-page-md.png' },
+];
+
+async function startColoring() {
+  showLoader(true);
+  try {
+    const page = COLORING_PAGES[Math.floor(Math.random() * COLORING_PAGES.length)];
+    document.getElementById('color-poke-name').textContent = page.name;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.getElementById('color-canvas');
+      const SIZE = Math.max(img.width, img.height);
+      canvas.width = SIZE; canvas.height = SIZE;
+      canvas.style.width = '300px'; canvas.style.height = '300px';
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, SIZE, SIZE);
+
+      // Draw centered
+      const scale = Math.min(SIZE / img.width, SIZE / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+
+      colorOriginalData = ctx.getImageData(0, 0, SIZE, SIZE);
+      showLoader(false);
+      goTo('screen-coloring');
+    };
+    img.onerror = () => { showLoader(false); document.getElementById('color-poke-name').textContent = 'Ошибка загрузки, попробуй другого!'; };
+    img.src = page.url;
+
+    // Render palette
+    const pal = document.getElementById('color-palette');
+    pal.innerHTML = COLOR_PALETTE.map((c, i) =>
+      `<div class="color-swatch${i===0?' selected':''}" style="background:${c}" onclick="pickColor(this,'${c}')"></div>`
+    ).join('');
+  } catch(e) { showLoader(false); }
+}
+
+function pickColor(el, color) {
+  colorSelected = color;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function clearColoring() {
+  if (!colorOriginalData) return;
+  const canvas = document.getElementById('color-canvas');
+  canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(colorOriginalData.data), colorOriginalData.width, colorOriginalData.height), 0, 0);
+}
+
+function saveColoring() {
+  const canvas = document.getElementById('color-canvas');
+  const link = document.createElement('a');
+  link.download = 'pokemon-coloring.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// Flood fill on canvas tap — attach directly (no DOMContentLoaded)
+(function() {
+  const canvas = document.getElementById('color-canvas');
+  if (!canvas) return;
+  function handleTap(clientX, clientY) {
+    if (!colorOriginalData) return; // not loaded yet
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+    const x = Math.floor((clientX - rect.left) * scaleX);
+    const y = Math.floor((clientY - rect.top) * scaleY);
+    floodFill(canvas, x, y, colorSelected);
+  }
+  // Touch for mobile (primary)
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const t = e.touches[0];
+    handleTap(t.clientX, t.clientY);
+  }, { passive: false });
+  // Click for desktop fallback
+  canvas.addEventListener('click', (e) => {
+    handleTap(e.clientX, e.clientY);
+  });
+})();
+
+function floodFill(canvas, startX, startY, fillColor) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+
+  const idx = (startY * w + startX) * 4;
+  const sr = data[idx], sg = data[idx+1], sb = data[idx+2];
+
+  // Parse fill color
+  const fc = document.createElement('canvas').getContext('2d');
+  fc.fillStyle = fillColor;
+  fc.fillRect(0,0,1,1);
+  const [fr, fg, fb] = fc.getImageData(0,0,1,1).data;
+
+  // Don't fill dark outlines or same color
+  if (sr < 80 && sg < 80 && sb < 80) return; // black outline
+  if (Math.abs(sr-fr) < 5 && Math.abs(sg-fg) < 5 && Math.abs(sb-fb) < 5) return;
+
+  const tolerance = 40;
+  const match = (i) => Math.abs(data[i]-sr) < tolerance && Math.abs(data[i+1]-sg) < tolerance && Math.abs(data[i+2]-sb) < tolerance;
+
+  const stack = [[startX, startY]];
+  const visited = new Uint8Array(w * h);
+  let count = 0;
+  const maxPixels = 120000;
+
+  while (stack.length > 0 && count < maxPixels) {
+    const [cx, cy] = stack.pop();
+    if (cx < 0 || cx >= w || cy < 0 || cy >= h) continue;
+    const pos = cy * w + cx;
+    if (visited[pos]) continue;
+    const pi = pos * 4;
+    if (!match(pi)) continue;
+    visited[pos] = 1;
+    data[pi] = fr; data[pi+1] = fg; data[pi+2] = fb;
+    count++;
+    stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]);
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+// ---- WHO'S THAT POKEMON ----
+let wtpCorrectName = '';
+let wtpPokemonData = null;
+
+async function startWhosThat() {
+  showLoader(true);
+  try {
+    // Pick random pokemon id 1-151
+    const id = Math.floor(Math.random() * 151) + 1;
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    wtpPokemonData = data;
+    wtpCorrectName = data.name;
+
+    // Get 3 random wrong pokemon names
+    const wrongIds = new Set();
+    while (wrongIds.size < 3) {
+      const wid = Math.floor(Math.random() * 151) + 1;
+      if (wid !== id) wrongIds.add(wid);
+    }
+    const wrongNames = [];
+    for (const wid of wrongIds) {
+      const wr = await fetch(`https://pokeapi.co/api/v2/pokemon/${wid}`);
+      if (wr.ok) { const wd = await wr.json(); wrongNames.push(wd.name); }
+    }
+
+    const img = document.getElementById('wtp-img');
+    img.src = data.sprites.other?.['official-artwork']?.front_default || data.sprites.front_default;
+    img.classList.remove('revealed');
+
+    const options = [wtpCorrectName, ...wrongNames].sort(() => Math.random() - 0.5);
+    const grid = document.getElementById('wtp-options');
+    grid.innerHTML = options.map(name =>
+      `<button class="wtp-opt" onclick="checkWhosThat(this, '${name}')">${capitalize(name)}</button>`
+    ).join('');
+
+    document.getElementById('wtp-result').textContent = '';
+    showLoader(false);
+    goTo('screen-whosthat');
+  } catch(e) {
+    showLoader(false);
+  }
+}
+
+function checkWhosThat(btn, answer) {
+  if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+
+  if (answer === wtpCorrectName) {
+    playCorrectSound();
+    btn.classList.add('correct');
+    document.getElementById('wtp-img').classList.add('revealed');
+    document.getElementById('wtp-result').innerHTML = `<span style="color:var(--green)">🎉 Правильно! Это ${capitalize(wtpCorrectName)}!</span>`;
+
+    // Add to collection
+    streak++;
+    localStorage.setItem('pokescan_streak', streak);
+    if (wtpPokemonData && !collection.find(c => c.id === wtpPokemonData.id)) {
+      const p = wtpPokemonData;
+      const staticImg = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default;
+      collection.push({ id: p.id, name: p.name, img: staticImg, types: p.types.map(t => t.type.name) });
+      localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+    }
+    checkAchievements();
+
+    // Play cry
+    const cryUrl = wtpPokemonData?.cries?.latest;
+    if (cryUrl) { try { const c = new Audio(cryUrl); c.volume = 0.4; c.play().catch(()=>{}); } catch(e){} }
+
+    setTimeout(() => startWhosThat(), 2500);
+  } else {
+    playWrongSound();
+    btn.classList.add('wrong');
+    streak = 0;
+    localStorage.setItem('pokescan_streak', '0');
+    document.getElementById('wtp-result').innerHTML = `<span style="color:var(--red)">Попробуй ещё!</span>`;
+    setTimeout(() => btn.classList.remove('wrong'), 600);
+  }
+}
+
+// ---- SPELLING MODE ----
+const SPELL_POKEMON = [
+  { en: 'pikachu', ru: 'Пикачу', wrong: ['Пикочу', 'Пикашу', 'Пикачо'] },
+  { en: 'charmander', ru: 'Чармандер', wrong: ['Чармондер', 'Чармандар', 'Шармандер'] },
+  { en: 'bulbasaur', ru: 'Бульбазавр', wrong: ['Бульбозавр', 'Бульбазавар', 'Бульбасавр'] },
+  { en: 'squirtle', ru: 'Сквиртл', wrong: ['Скиртл', 'Сквиртол', 'Сквертл'] },
+  { en: 'eevee', ru: 'Иви', wrong: ['Ива', 'Эви', 'Иве'] },
+  { en: 'meowth', ru: 'Мяут', wrong: ['Мяуд', 'Мяуть', 'Миаут'] },
+  { en: 'psyduck', ru: 'Псидак', wrong: ['Псидук', 'Сайдак', 'Псидок'] },
+  { en: 'snorlax', ru: 'Снорлакс', wrong: ['Снорлокс', 'Снарлакс', 'Снорлекс'] },
+  { en: 'gengar', ru: 'Гэнгар', wrong: ['Генгар', 'Гэнгор', 'Гэнгер'] },
+  { en: 'jigglypuff', ru: 'Джиглипафф', wrong: ['Джиглипуфф', 'Жиглипафф', 'Джиглипаф'] },
+];
+
+let spellCurrent = null;
+var spellAudio = null;
+
+async function startSpelling() {
+  // Pick random pokemon
+  spellCurrent = SPELL_POKEMON[Math.floor(Math.random() * SPELL_POKEMON.length)];
+
+  // Load pokemon data from API for image
+  showLoader(true);
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${spellCurrent.en}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    currentPokemon = data;
+
+    const img = document.getElementById('spell-img');
+    img.src = data.sprites.other?.['official-artwork']?.front_default || data.sprites.front_default;
+    img.style.display = '';
+    img.classList.remove('revealed');
+
+    // Build options
+    const options = [spellCurrent.ru, ...spellCurrent.wrong].sort(() => Math.random() - 0.5);
+    const grid = document.getElementById('spell-options');
+    grid.innerHTML = options.map(o =>
+      `<button class="spell-opt" onclick="checkSpelling(this, '${o}')">${o}</button>`
+    ).join('');
+
+    document.getElementById('spell-hint').textContent = 'Нажми 🔊 чтобы послушать';
+    showLoader(false);
+    goTo('screen-spelling');
+
+    // Auto-play name
+    setTimeout(() => spellListen(), 500);
+  } catch(e) {
+    showLoader(false);
+  }
+}
+
+async function spellListen() {
+  if (!spellCurrent) return;
+  const btn = document.getElementById('spell-listen-btn');
+
+  if (spellAudio && !spellAudio.paused) {
+    spellAudio.pause();
+    spellAudio = null;
+    btn.classList.remove('playing');
+    return;
+  }
+
+  btn.classList.add('playing');
+
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'xi-api-key': getElevenlabsKey() },
+      body: JSON.stringify({
+        text: spellCurrent.ru,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.4, use_speaker_boost: true }
+      })
+    });
+    if (!res.ok) throw new Error();
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    spellAudio = new Audio(url);
+    spellAudio.onended = () => { btn.classList.remove('playing'); URL.revokeObjectURL(url); spellAudio = null; };
+    spellAudio.play();
+  } catch(e) {
+    btn.classList.remove('playing');
+  }
+}
+
+function checkSpelling(btn, answer) {
+  if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+
+  if (answer === spellCurrent.ru) {
+    playCorrectSound();
+    btn.classList.add('correct');
+    document.getElementById('spell-img').classList.add('revealed');
+    document.getElementById('spell-hint').textContent = '🎉 Правильно! Это ' + spellCurrent.ru + '!';
+
+    // Add to collection via the same flow
+    streak++;
+    localStorage.setItem('pokescan_streak', streak);
+
+    // Save to collection
+    if (currentPokemon && !collection.find(c => c.id === currentPokemon.id)) {
+      const p = currentPokemon;
+      const staticImg = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default;
+      collection.push({ id: p.id, name: p.name, img: staticImg, types: p.types.map(t => t.type.name) });
+      localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+    }
+    checkAchievements();
+
+    // Play cry
+    const cryUrl = currentPokemon?.cries?.latest;
+    if (cryUrl) { try { const c = new Audio(cryUrl); c.volume = 0.4; c.play().catch(()=>{}); } catch(e){} }
+
+    setTimeout(() => startSpelling(), 2000);
+  } else {
+    playWrongSound();
+    btn.classList.add('wrong');
+    streak = 0;
+    localStorage.setItem('pokescan_streak', '0');
+    document.getElementById('spell-hint').textContent = 'Попробуй ещё раз!';
+    setTimeout(() => btn.classList.remove('wrong'), 600);
+  }
+}
+
+// ---- ACHIEVEMENTS ----
+const ACHIEVEMENTS = [
+  { id: 'first', icon: '🎉', name: 'Первый покемон', desc: 'Поймай своего первого покемона', check: () => collection.length >= 1 },
+  { id: 'ten', icon: '🔟', name: 'Десяточка', desc: 'Поймай 10 покемонов', check: () => collection.length >= 10 },
+  { id: 'fifty', icon: '👑', name: 'Мастер-тренер', desc: 'Поймай 50 покемонов', check: () => collection.length >= 50 },
+  { id: 'lightning', icon: '⚡', name: 'Молниеносный', desc: 'Реши пример за 10 секунд', check: () => wasLightning },
+  { id: 'streak3', icon: '🔥', name: 'Серия из 3', desc: '3 правильных ответа подряд', check: () => streak >= 3 },
+  { id: 'streak10', icon: '💥', name: 'Серия из 10', desc: '10 правильных ответов подряд', check: () => streak >= 10 },
+  { id: 'alltypes', icon: '🌈', name: 'Коллекционер типов', desc: 'Собери все 18 типов покемонов', check: () => {
+    const allTypes = new Set();
+    collection.forEach(c => (c.types || []).forEach(t => allTypes.add(t)));
+    return allTypes.size >= 18;
+  }},
+];
+
+let unlockedAchievements = JSON.parse(localStorage.getItem('pokescan_achievements') || '[]');
+
+function checkAchievements() {
+  ACHIEVEMENTS.forEach(a => {
+    if (!unlockedAchievements.includes(a.id) && a.check()) {
+      unlockedAchievements.push(a.id);
+      localStorage.setItem('pokescan_achievements', JSON.stringify(unlockedAchievements));
+      showToast(a.icon, a.name);
+    }
+  });
+}
+
+function showToast(icon, text) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<div class="toast-icon">${icon}</div><div><div class="toast-text">${text}</div><div class="toast-sub">Достижение открыто!</div></div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add('hide'), 2500);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function renderAchievements() {
+  const grid = document.getElementById('ach-grid');
+  grid.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = unlockedAchievements.includes(a.id);
+    return `<div class="ach-item ${unlocked ? 'unlocked' : 'locked'}">
+      <div class="ach-icon">${a.icon}</div>
+      <div class="ach-name">${a.name}</div>
+      <div class="ach-desc">${a.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---- SETTINGS ----
+function openSettings() {
+  document.getElementById('set-anthropic').value = getAnthropicKey();
+  document.getElementById('set-elevenlabs').value = getElevenlabsKey();
+  document.getElementById('settings-overlay').classList.add('active');
+}
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('active');
+}
+function saveSettings() {
+  const ak = document.getElementById('set-anthropic').value.trim();
+  const ek = document.getElementById('set-elevenlabs').value.trim();
+  if (ak) localStorage.setItem('pokescan_anthropic_key', ak);
+  else localStorage.removeItem('pokescan_anthropic_key');
+  if (ek) localStorage.setItem('pokescan_elevenlabs_key', ek);
+  else localStorage.removeItem('pokescan_elevenlabs_key');
+  updateSettingsBtn();
+  closeSettings();
+}
+function updateSettingsBtn() {
+  const btn = document.getElementById('settings-btn');
+  btn.classList.toggle('configured', !!(getAnthropicKey() && getElevenlabsKey()));
+}
+function checkKeysOnAction(needAnthropic) {
+  if (needAnthropic && !getAnthropicKey()) { openSettings(); return false; }
+  return true;
+}
+
+// init
+updatePokedexProgress();
+updateSettingsBtn();
+// Show settings on first launch if no keys
+if (!getAnthropicKey()) setTimeout(() => openSettings(), 2200);
+setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 500); }, 2000);
+
+async function speakPokemon() {
+  const btn = document.getElementById('speak-btn');
+  if (!btn) return;
+
+  // If already playing, stop
+  if (currentAudio && !currentAudio.paused) {
+    currentAudio.pause();
+    currentAudio = null;
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 Послушать';
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.innerHTML = '⏳ Загружаю...';
+
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'xi-api-key': getElevenlabsKey()
+      },
+      body: JSON.stringify({
+        text: currentSpeechText,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.3 }
+      })
+    });
+
+    if (!res.ok) throw new Error('ElevenLabs error');
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+
+    btn.classList.remove('loading');
+    btn.classList.add('playing');
+    btn.innerHTML = '⏹ Остановить';
+
+    currentAudio.onended = () => {
+      btn.classList.remove('playing');
+      btn.innerHTML = '🔊 Послушать ещё раз';
+      URL.revokeObjectURL(url);
+      currentAudio = null;
+    };
+
+    currentAudio.play();
+  } catch(e) {
+    // Fallback: browser TTS
+    btn.classList.remove('loading');
+    const utter = new SpeechSynthesisUtterance(currentSpeechText);
+    utter.lang = 'ru-RU';
+    utter.rate = 0.85;
+    btn.classList.add('playing');
+    btn.innerHTML = '⏹ Остановить';
+    utter.onend = () => { btn.classList.remove('playing'); btn.innerHTML = '🔊 Послушать ещё раз'; };
+    speechSynthesis.speak(utter);
+  }
+}
+
+// ---- 3D TILT (gyroscope) ----
+let tiltEnabled = false;
+function initTilt() {
+  if (tiltEnabled) return;
+  const handler = (e) => {
+    const card = document.getElementById('poke-card-tilt');
+    if (!card || !document.getElementById('screen-pokemon').classList.contains('active')) return;
+    const x = Math.max(-8, Math.min(8, (e.gamma || 0) * 0.3));
+    const y = Math.max(-8, Math.min(8, (e.beta - 45 || 0) * -0.3));
+    card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+    card.classList.add('tilting');
+    const shine = card.querySelector('.tilt-shine');
+    if (shine) shine.style.background = `linear-gradient(${135 + x * 5}deg, rgba(255,255,255,${0.1 + Math.abs(x) * 0.02}) 0%, transparent 50%)`;
+  };
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    document.addEventListener('click', function askGyro() {
+      DeviceOrientationEvent.requestPermission().then(p => {
+        if (p === 'granted') { window.addEventListener('deviceorientation', handler); tiltEnabled = true; }
+      }).catch(() => {});
+      document.removeEventListener('click', askGyro);
+    }, { once: true });
+  } else if ('DeviceOrientationEvent' in window) {
+    window.addEventListener('deviceorientation', handler);
+    tiltEnabled = true;
+  }
+}
+initTilt();
+
+// Build speech text and auto-play after card opens
+const _origShowPokemon = showPokemon;
+showPokemon = function() {
+  _origShowPokemon();
+  const p = currentPokemon;
+  const name = capitalize(p.name);
+  const fact = FACTS_RU[p.name] || getFallbackFact(p);
+  currentSpeechText = `${name}! ${fact}`;
+  // Check achievements
+  checkAchievements();
+};
+</script>
+</body>
+</html>
