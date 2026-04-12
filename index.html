@@ -2404,7 +2404,6 @@ updatePokedexProgress();
 updateDailyStreak();
 renderQuestStars();
 updateSettingsBtn();
-if (!getAnthropicKey()) setTimeout(() => openSettings(), 2200);
 setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 500); }, 2000);
 
 async function speakPokemon() {
