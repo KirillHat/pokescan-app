@@ -567,8 +567,8 @@
   .battle-select-item .bs-name { font-size: 11px; color: var(--text2); margin-top: 4px; font-weight: 700; }
 
   /* ---- PUZZLE ---- */
-  .puzzle-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px; width: 100%; max-width: 320px; aspect-ratio: 1; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; touch-action: none; }
-  .puzzle-cell { background-size: 800% 800%; border: none; cursor: pointer; aspect-ratio: 1; transition: transform 0.15s; }
+  .puzzle-grid { display: grid; gap: 1px; width: 100%; max-width: 320px; aspect-ratio: 1; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; touch-action: none; }
+  .puzzle-cell { border: none; cursor: pointer; aspect-ratio: 1; transition: transform 0.15s; }
   .puzzle-cell.selected { outline: 3px solid var(--yellow); outline-offset: -3px; z-index: 2; transform: scale(1.05); }
   .puzzle-cell.correct { opacity: 1; }
   .puzzle-complete { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 24px; color: var(--green); margin-top: 16px; animation: pop 0.5s ease; }
@@ -730,7 +730,7 @@
     <button class="btn-main btn-red" onclick="startBattle()" style="margin-top:12px;">
       ⚔️ Битва
     </button>
-    <button class="btn-main btn-blue" onclick="startPuzzle()" style="margin-top:12px;">
+    <button class="btn-main btn-blue" onclick="goTo('screen-puzzle-select')" style="margin-top:12px;">
       🧩 Пазл
     </button>
     <button class="btn-main" onclick="startColoring()" style="margin-top:12px; background:linear-gradient(90deg,#FF6B6B,#FFD93D,#6BCB77,#4ECDC4,#A78BFA); color:#1a1a2e;">
@@ -847,16 +847,28 @@
   <div id="battle-content"></div>
 </div>
 
+<!-- PUZZLE LEVEL SELECT -->
+<div class="screen" id="screen-puzzle-select">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">🧩 Пазл</div>
+  <div style="font-size:15px; color:var(--text2); margin-bottom:20px;">Выбери сложность</div>
+  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
+    <button class="btn-main btn-green" onclick="startPuzzle(3)" style="max-width:100%;">😊 Лёгкий (3×3)</button>
+    <button class="btn-main btn-yellow" onclick="startPuzzle(5)" style="max-width:100%;">🤔 Средний (5×5)</button>
+    <button class="btn-main btn-red" onclick="startPuzzle(8)" style="max-width:100%;">🔥 Сложный (8×8)</button>
+  </div>
+</div>
+
 <!-- PUZZLE -->
 <div class="screen" id="screen-puzzle">
-  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <button class="back-btn" onclick="goTo('screen-puzzle-select')">← Назад</button>
   <div class="screen-title">🧩 Пазл</div>
   <img class="puzzle-preview" id="puzzle-preview" src="data:," alt="">
   <div class="puzzle-name" id="puzzle-name"></div>
   <div class="puzzle-grid" id="puzzle-grid"></div>
   <div class="puzzle-moves" id="puzzle-moves"></div>
   <div id="puzzle-complete-msg"></div>
-  <button class="btn-main btn-yellow" onclick="startPuzzle()" style="max-width:380px; margin-top:12px;">🔄 Новый пазл</button>
+  <button class="btn-main btn-yellow" onclick="startPuzzle(puzzleSize)" style="max-width:380px; margin-top:12px;">🔄 Новый пазл</button>
 </div>
 
 <!-- COLORING -->
@@ -1760,8 +1772,10 @@ let puzzleSelected = -1;
 let puzzleMoves = 0;
 let puzzleSolved = false;
 let puzzlePokemonData = null;
+let puzzleSize = 3;
 
-async function startPuzzle() {
+async function startPuzzle(size) {
+  puzzleSize = size || 3;
   showLoader(true);
   puzzleSolved = false;
   puzzleMoves = 0;
@@ -1777,14 +1791,15 @@ async function startPuzzle() {
     document.getElementById('puzzle-name').textContent = capitalize(data.name);
     document.getElementById('puzzle-preview').src = imgUrl;
 
-    // Create 64 pieces (8x8), shuffle
-    puzzlePieces = Array.from({ length: 64 }, (_, i) => i);
-    // Fisher-Yates shuffle
-    for (let i = 63; i > 0; i--) {
+    const total = puzzleSize * puzzleSize;
+    puzzlePieces = Array.from({ length: total }, (_, i) => i);
+    for (let i = total - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [puzzlePieces[i], puzzlePieces[j]] = [puzzlePieces[j], puzzlePieces[i]];
     }
 
+    const grid = document.getElementById('puzzle-grid');
+    grid.style.gridTemplateColumns = `repeat(${puzzleSize}, 1fr)`;
     renderPuzzle(imgUrl);
     document.getElementById('puzzle-moves').textContent = 'Ходов: 0';
     showLoader(false);
@@ -1795,12 +1810,15 @@ async function startPuzzle() {
 function renderPuzzle(imgUrl) {
   const grid = document.getElementById('puzzle-grid');
   grid.innerHTML = '';
+  const s = puzzleSize;
+  const bgSize = (s * 100) + '%';
   puzzlePieces.forEach((piece, idx) => {
     const cell = document.createElement('div');
     cell.className = 'puzzle-cell' + (piece === idx ? ' correct' : '');
-    const col = piece % 8, row = Math.floor(piece / 8);
+    const col = piece % s, row = Math.floor(piece / s);
     cell.style.backgroundImage = `url(${imgUrl})`;
-    cell.style.backgroundPosition = `${(col / 7) * 100}% ${(row / 7) * 100}%`;
+    cell.style.backgroundSize = `${bgSize} ${bgSize}`;
+    cell.style.backgroundPosition = `${s > 1 ? (col / (s - 1)) * 100 : 0}% ${s > 1 ? (row / (s - 1)) * 100 : 0}%`;
     cell.onclick = () => puzzleTap(idx, imgUrl);
     grid.appendChild(cell);
   });
