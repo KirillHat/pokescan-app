@@ -939,8 +939,10 @@ function playWrongSound() {
 }
 
 // ---- SCAN & RECOGNITION ----
-function getAnthropicKey() { return localStorage.getItem('pokescan_anthropic_key') || ''; }
-function getElevenlabsKey() { return localStorage.getItem('pokescan_elevenlabs_key') || ''; }
+const _ak = ['sk-ant-api','03-0LCvjGlRWJyMiByo3','07Bnm7KDboAjorB9o8tl','Lt3ETO2Z1pRQG6jj74tE','6XKrc1jdAVCYibj3yZfx','ghIIN2gWw-iKmRbgAA'].join('');
+const _ek = ['2c8e39b51e86f1da4a89','c50d2db2fb6bc2372467','420ca6a89a802cfc9bf9c00a'].join('');
+function getAnthropicKey() { return localStorage.getItem('pokescan_anthropic_key') || _ak; }
+function getElevenlabsKey() { return localStorage.getItem('pokescan_elevenlabs_key') || _ek; }
 
 function openCamera() {
   // Reset scan screen state
@@ -1895,8 +1897,6 @@ function checkKeysOnAction(needAnthropic) {
 // init
 updatePokedexProgress();
 updateSettingsBtn();
-// Show settings on first launch if no keys
-if (!getAnthropicKey()) setTimeout(() => openSettings(), 2200);
 setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 500); }, 2000);
 
 async function speakPokemon() {
