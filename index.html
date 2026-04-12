@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ПокеСкан">
 <title>ПокеСкан</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMWExYTJlIi8+PGNpcmNsZSBjeD0iOTAiIGN5PSI5MCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMwIDkwYTYwIDYwIDAgMCAxIDEyMCAwIiBmaWxsPSIjRkY2QjZCIi8+PHBhdGggZD0iTTMwIDkwYTYwIDYwIDAgMCAwIDEyMCAwIiBmaWxsPSIjZjBmMGYwIi8+PHJlY3QgeD0iMjgiIHk9Ijg2IiB3aWR0aD0iMTI0IiBoZWlnaHQ9IjgiIGZpbGw9IiMxYTFhMmUiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjkwIiByPSIxNiIgZmlsbD0id2hpdGUiIHN0cm9rZT0iIzFhMWEyZSIgc3Ryb2tlLXdpZHRoPSI2Ii8+PGNpcmNsZSBjeD0iOTAiIGN5PSI5MCIgcj0iOCIgZmlsbD0iI0ZGRDkzRCIvPjwvc3ZnPg==">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -97,6 +98,27 @@
   .btn-purple { background: var(--purple); color: #1a1a2e; box-shadow: 0 6px 24px rgba(167,139,250,0.35); margin-top: 12px; }
   .btn-green { background: var(--green); color: #1a1a2e; box-shadow: 0 6px 24px rgba(107,203,119,0.35); margin-top: 12px; }
   .btn-red { background: var(--red); color: white; box-shadow: 0 6px 24px rgba(255,107,107,0.35); margin-top: 12px; }
+
+  /* ---- EVOLUTION ---- */
+  .evo-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(26,26,46,0.97); display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fade-in 0.3s ease; }
+  .evo-title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px; color: var(--text2); margin-bottom: 16px; }
+  .evo-sprite { width: 140px; height: 140px; object-fit: contain; }
+  .evo-sprite.glow { animation: evo-glow 1.5s ease forwards; }
+  .evo-arrow { font-size: 36px; margin: 12px 0; color: var(--yellow); opacity: 0; animation: evo-arrow-show 0.3s ease 1.2s forwards; }
+  .evo-new { width: 160px; height: 160px; object-fit: contain; opacity: 0; animation: evo-new-show 0.6s ease 1.5s forwards; filter: drop-shadow(0 0 30px rgba(255,217,61,0.5)); }
+  .evo-name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 28px; color: var(--yellow); opacity: 0; animation: text-appear 0.4s ease 2.0s forwards; }
+  @keyframes evo-glow { 0% { filter: brightness(1); } 50% { filter: brightness(3) blur(4px); } 100% { filter: brightness(5) blur(8px); opacity: 0; } }
+  @keyframes evo-arrow-show { to { opacity: 1; } }
+  @keyframes evo-new-show { 0% { transform: scale(0.3); opacity: 0; filter: brightness(3); } 100% { transform: scale(1); opacity: 1; filter: brightness(1); } }
+
+  /* ---- DAILY STREAK & QUEST ---- */
+  .daily-row { display: flex; gap: 10px; width: 100%; max-width: 280px; margin-bottom: 12px; }
+  .streak-badge { flex: 1; background: rgba(255,107,107,0.12); border: 1.5px solid rgba(255,107,107,0.2); border-radius: 14px; padding: 8px 12px; text-align: center; }
+  .streak-badge .streak-val { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--red); }
+  .streak-badge .streak-label { font-size: 11px; color: var(--text2); }
+  .quest-badge { flex: 1.5; background: rgba(255,217,61,0.1); border: 1.5px solid rgba(255,217,61,0.2); border-radius: 14px; padding: 8px 12px; text-align: center; }
+  .quest-badge .quest-title { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .quest-stars { font-size: 18px; letter-spacing: 2px; }
 
   /* ---- POKEDEX PROGRESS ---- */
   .pokedex-progress { width: 100%; max-width: 280px; margin-bottom: 28px; }
@@ -434,6 +456,16 @@
   .scan-status { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; color: var(--yellow); text-align: center; }
   .scan-status.error { color: var(--red); }
   .scan-status.success { color: var(--green); }
+  .scan-ball-anim {
+    width: 60px; height: 60px; border-radius: 50%; margin: 16px auto;
+    background: linear-gradient(180deg, #FF6B6B 0%, #FF6B6B 47%, #fff 47%, #fff 53%, #1a1a2e 53%);
+    animation: scan-ball-spin 0.8s linear infinite;
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .scan-ball-anim .sba-center { width: 14px; height: 14px; border-radius: 50%; background: white; border: 3px solid #1a1a2e; }
+  .scan-ball-anim.found { animation: scan-ball-pop 0.5s ease forwards; }
+  @keyframes scan-ball-spin { to { transform: rotate(360deg); } }
+  @keyframes scan-ball-pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(0); opacity: 0; } }
 
   /* ---- MANUAL SEARCH MODAL ---- */
   .manual-search-overlay {
@@ -508,6 +540,41 @@
   .settings-save { background: var(--green); color: #1a1a2e; }
   .settings-cancel { background: rgba(255,255,255,0.08); color: var(--text2); }
   .settings-hint { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  /* ---- BATTLE ---- */
+  .battle-arena { width: 100%; max-width: 380px; }
+  .battle-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+  .battle-poke { text-align: center; width: 45%; }
+  .battle-poke img { width: 100px; height: 100px; object-fit: contain; transition: transform 0.15s; }
+  .battle-poke img.shake-hit { animation: shake 0.4s ease; }
+  .battle-poke img.flash-hit { animation: battle-flash 0.3s ease; }
+  @keyframes battle-flash { 0%,100% { filter: brightness(1); } 50% { filter: brightness(3); } }
+  .battle-name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: var(--text); margin-top: 4px; }
+  .battle-hp-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 6px; overflow: hidden; }
+  .battle-hp-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .battle-hp-fill.high { background: var(--green); }
+  .battle-hp-fill.med { background: var(--yellow); }
+  .battle-hp-fill.low { background: var(--red); }
+  .battle-hp-text { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .battle-vs { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--red); align-self: center; }
+  .battle-math { width: 100%; max-width: 380px; background: var(--card); border-radius: var(--radius); padding: 20px; text-align: center; border: 1.5px solid rgba(255,255,255,0.08); margin-bottom: 12px; }
+  .battle-expr { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 32px; color: var(--text); margin: 8px 0; }
+  .battle-msg { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; text-align: center; margin-top: 12px; animation: pop 0.3s ease; }
+  .battle-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 380px; margin-top: 12px; }
+  .battle-select-item { background: var(--card); border-radius: 14px; padding: 10px; text-align: center; border: 1.5px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.15s; }
+  .battle-select-item:active { transform: scale(0.95); }
+  .battle-select-item img { width: 56px; height: 56px; object-fit: contain; }
+  .battle-select-item .bs-name { font-size: 11px; color: var(--text2); margin-top: 4px; font-weight: 700; }
+
+  /* ---- PUZZLE ---- */
+  .puzzle-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px; width: 100%; max-width: 320px; aspect-ratio: 1; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; touch-action: none; }
+  .puzzle-cell { background-size: 800% 800%; border: none; cursor: pointer; aspect-ratio: 1; transition: transform 0.15s; }
+  .puzzle-cell.selected { outline: 3px solid var(--yellow); outline-offset: -3px; z-index: 2; transform: scale(1.05); }
+  .puzzle-cell.correct { opacity: 1; }
+  .puzzle-complete { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 24px; color: var(--green); margin-top: 16px; animation: pop 0.5s ease; }
+  .puzzle-name { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 18px; color: var(--yellow); margin-bottom: 8px; }
+  .puzzle-preview { width: 80px; height: 80px; object-fit: contain; border-radius: 12px; margin-bottom: 8px; opacity: 0.4; border: 1.5px solid rgba(255,255,255,0.1); }
+  .puzzle-moves { font-size: 14px; color: var(--text2); margin-top: 8px; }
 
   /* ---- COLORING ---- */
   .color-canvas-wrap { background: white; border-radius: 16px; padding: 8px; margin: 12px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
@@ -637,6 +704,10 @@
   <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;">
     <div class="home-logo">⚡ ПокеСкан</div>
     <div class="home-sub">Учись и собирай покемонов!</div>
+    <div class="daily-row" id="daily-row">
+      <div class="streak-badge"><div class="streak-val" id="day-streak-val">0</div><div class="streak-label">дней подряд 🔥</div></div>
+      <div class="quest-badge"><div class="quest-title">Ежедневный квест</div><div class="quest-stars" id="quest-stars">☆☆☆</div></div>
+    </div>
     <div class="pokedex-progress" id="pokedex-progress">
       <div class="pokedex-label">Покедекс: <strong id="pokedex-count">0</strong> из <strong>151</strong></div>
       <div class="pokedex-bar"><div class="pokedex-fill" id="pokedex-fill" style="width:0%"></div></div>
@@ -655,6 +726,12 @@
     </button>
     <button class="btn-main btn-red" onclick="startWhosThat()">
       ❓ Кто этот покемон?
+    </button>
+    <button class="btn-main btn-red" onclick="startBattle()" style="margin-top:12px;">
+      ⚔️ Битва
+    </button>
+    <button class="btn-main btn-blue" onclick="startPuzzle()" style="margin-top:12px;">
+      🧩 Пазл
     </button>
     <button class="btn-main" onclick="startColoring()" style="margin-top:12px; background:linear-gradient(90deg,#FF6B6B,#FFD93D,#6BCB77,#4ECDC4,#A78BFA); color:#1a1a2e;">
       🎨 Раскраска
@@ -761,6 +838,25 @@
   <button class="spell-listen-btn" id="spell-listen-btn" onclick="spellListen()">🔊</button>
   <div class="spell-options" id="spell-options"></div>
   <div class="spell-hint" id="spell-hint"></div>
+</div>
+
+<!-- BATTLE -->
+<div class="screen" id="screen-battle">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">⚔️ Битва</div>
+  <div id="battle-content"></div>
+</div>
+
+<!-- PUZZLE -->
+<div class="screen" id="screen-puzzle">
+  <button class="back-btn" onclick="goTo('screen-home')">← Назад</button>
+  <div class="screen-title">🧩 Пазл</div>
+  <img class="puzzle-preview" id="puzzle-preview" src="data:," alt="">
+  <div class="puzzle-name" id="puzzle-name"></div>
+  <div class="puzzle-grid" id="puzzle-grid"></div>
+  <div class="puzzle-moves" id="puzzle-moves"></div>
+  <div id="puzzle-complete-msg"></div>
+  <button class="btn-main btn-yellow" onclick="startPuzzle()" style="max-width:380px; margin-top:12px;">🔄 Новый пазл</button>
 </div>
 
 <!-- COLORING -->
@@ -900,11 +996,12 @@ function goTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
+  try { playTransitionSound(); } catch(e) {}
 
   if (id !== 'screen-spelling' && window.spellAudio) { spellAudio.pause(); spellAudio = null; }
   if (id !== 'screen-pokemon' && window.currentAudio) { currentAudio.pause(); currentAudio = null; }
   if (id === 'screen-collection') renderCollection();
-  if (id === 'screen-home') updatePokedexProgress();
+  if (id === 'screen-home') { updatePokedexProgress(); updateDailyStreak(); renderQuestStars(); }
   if (id === 'screen-achievements') renderAchievements();
 }
 
@@ -937,6 +1034,30 @@ function playWrongSound() {
   osc.start();
   osc.stop(audioCtx.currentTime + 0.25);
 }
+
+function playTapSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine'; osc.frequency.value = 800;
+  gain.gain.value = 0.06;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+}
+function playTransitionSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine'; osc.frequency.value = 600;
+  osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
+  gain.gain.value = 0.05;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+}
+// Tap sound on buttons
+document.addEventListener('touchstart', (e) => {
+  if (e.target.closest('.btn-main, .back-btn, .sug-chip, .nav-tab')) playTapSound();
+}, { passive: true });
 
 // ---- SCAN & RECOGNITION ----
 function getAnthropicKey() { return localStorage.getItem('pokescan_anthropic_key') || ''; }
@@ -971,7 +1092,7 @@ async function onPhotoTaken(event) {
   document.getElementById('scan-preview').style.display = 'flex';
 
   const status = document.getElementById('scan-status');
-  status.textContent = '🔍 Распознаю покемона...';
+  status.innerHTML = '<div class="scan-ball-anim"><div class="sba-center"></div></div>Распознаю покемона...';
   status.className = 'scan-status';
 
   try {
@@ -983,7 +1104,11 @@ async function onPhotoTaken(event) {
     const pokemonName = await recognizePokemon(base64);
     if (!pokemonName) throw new Error('not recognized');
 
-    status.textContent = '✅ Нашёл: ' + pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1) + '!';
+    const ball = status.querySelector('.scan-ball-anim');
+    if (ball) ball.classList.add('found');
+    setTimeout(() => {
+      status.innerHTML = '✅ Нашёл: ' + pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1) + '!';
+    }, 400);
     status.className = 'scan-status success';
 
     // Fetch from PokéAPI
@@ -1363,7 +1488,9 @@ function showPokemon() {
   if (!collection.find(c => c.id === p.id)) {
     collection.push({ id: p.id, name: p.name, img: staticImg, types });
     localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+    incrementDailyQuest();
   }
+  trackCatch(p.name);
 
   goTo('screen-pokemon');
 
@@ -1465,6 +1592,258 @@ document.getElementById('pokemon-input').addEventListener('keydown', e => { if (
 const ELEVENLABS_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — multilingual, warm female voice
 var currentAudio = null;
 var currentSpeechText = '';
+
+// ---- BATTLE ----
+let battleMyPoke = null, battleEnemyPoke = null;
+let battleMyHP = 100, battleEnemyHP = 100;
+let battleProblem = null, battleAnswer = null, battleSelectedAnswer = null;
+let battleActive = false;
+
+function startBattle() {
+  if (collection.length === 0) {
+    showToast('😕', 'Нужен хотя бы 1 покемон!');
+    return;
+  }
+  // Show pokemon select
+  const content = document.getElementById('battle-content');
+  content.innerHTML = `
+    <div class="screen-hint">Выбери покемона для битвы!</div>
+    <div class="battle-select-grid">
+      ${collection.map((c, i) => `
+        <div class="battle-select-item" onclick="selectBattlePoke(${i})">
+          <img src="${c.img}" alt="${c.name}">
+          <div class="bs-name">${capitalize(c.name)}</div>
+        </div>`).join('')}
+    </div>`;
+  goTo('screen-battle');
+}
+
+async function selectBattlePoke(idx) {
+  battleMyPoke = collection[idx];
+  showLoader(true);
+  try {
+    const eid = Math.floor(Math.random() * 151) + 1;
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${eid}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    battleEnemyPoke = {
+      name: data.name,
+      img: data.sprites.other?.['official-artwork']?.front_default || data.sprites.front_default,
+      id: data.id,
+      types: data.types.map(t => t.type.name),
+      data: data
+    };
+    battleMyHP = 100;
+    battleEnemyHP = 100;
+    battleActive = true;
+    showLoader(false);
+    battleNextRound();
+  } catch(e) { showLoader(false); }
+}
+
+function battleNextRound() {
+  if (!battleActive) return;
+  // Generate problem
+  let p;
+  if (currentLevel === 'easy') p = generateEasyProblem();
+  else if (currentLevel === 'hard') p = generateHardProblem();
+  else p = getProblem();
+  battleProblem = p;
+  battleAnswer = calcAnswer(p);
+  battleSelectedAnswer = null;
+
+  const choices = new Set([battleAnswer]);
+  while (choices.size < 4) {
+    const w = battleAnswer + Math.floor(Math.random() * 11) - 5;
+    if (w !== battleAnswer && w >= 0) choices.add(w);
+  }
+  const opts = [...choices].sort(() => Math.random() - 0.5);
+
+  const myHPClass = battleMyHP > 50 ? 'high' : battleMyHP > 25 ? 'med' : 'low';
+  const enHPClass = battleEnemyHP > 50 ? 'high' : battleEnemyHP > 25 ? 'med' : 'low';
+
+  document.getElementById('battle-content').innerHTML = `
+    <div class="battle-arena">
+      <div class="battle-row">
+        <div class="battle-poke">
+          <img id="battle-my-img" src="${battleMyPoke.img}" alt="${battleMyPoke.name}">
+          <div class="battle-name">${capitalize(battleMyPoke.name)}</div>
+          <div class="battle-hp-bar"><div class="battle-hp-fill ${myHPClass}" style="width:${battleMyHP}%"></div></div>
+          <div class="battle-hp-text">${battleMyHP} HP</div>
+        </div>
+        <div class="battle-vs">VS</div>
+        <div class="battle-poke">
+          <img id="battle-en-img" src="${battleEnemyPoke.img}" alt="${battleEnemyPoke.name}">
+          <div class="battle-name">${capitalize(battleEnemyPoke.name)}</div>
+          <div class="battle-hp-bar"><div class="battle-hp-fill ${enHPClass}" style="width:${battleEnemyHP}%"></div></div>
+          <div class="battle-hp-text">${battleEnemyHP} HP</div>
+        </div>
+      </div>
+      <div class="battle-math">
+        <div style="font-size:13px;color:var(--text2);">Реши пример чтобы атаковать!</div>
+        <div class="battle-expr">${p.map(x => x === '*' ? '×' : x).join(' ')} = ?</div>
+      </div>
+      <div class="num-grid" style="grid-template-columns:repeat(2,1fr);max-width:280px;margin:0 auto;">
+        ${opts.map(n => `<button class="num-btn" onclick="battleCheckAnswer(${n})">${n}</button>`).join('')}
+      </div>
+    </div>
+    <div class="battle-msg" id="battle-msg"></div>`;
+}
+
+function battleCheckAnswer(answer) {
+  if (!battleActive) return;
+  const msg = document.getElementById('battle-msg');
+  const enImg = document.getElementById('battle-en-img');
+  const myImg = document.getElementById('battle-my-img');
+
+  if (answer === battleAnswer) {
+    playCorrectSound();
+    const dmg = 20 + Math.floor(Math.random() * 15);
+    battleEnemyHP = Math.max(0, battleEnemyHP - dmg);
+    msg.innerHTML = `<span style="color:var(--green)">Попал! -${dmg} HP</span>`;
+    if (enImg) { enImg.classList.add('shake-hit'); setTimeout(() => enImg.classList.remove('shake-hit'), 500); }
+
+    if (battleEnemyHP <= 0) {
+      battleActive = false;
+      setTimeout(() => battleWin(), 800);
+      return;
+    }
+  } else {
+    playWrongSound();
+    const dmg = 15 + Math.floor(Math.random() * 10);
+    battleMyHP = Math.max(0, battleMyHP - dmg);
+    msg.innerHTML = `<span style="color:var(--red)">Промах! Враг атакует -${dmg} HP</span>`;
+    if (myImg) { myImg.classList.add('flash-hit'); setTimeout(() => myImg.classList.remove('flash-hit'), 400); }
+
+    if (battleMyHP <= 0) {
+      battleActive = false;
+      setTimeout(() => battleLose(), 800);
+      return;
+    }
+  }
+  setTimeout(() => battleNextRound(), 1200);
+}
+
+function battleWin() {
+  playCorrectSound();
+  document.getElementById('battle-content').innerHTML = `
+    <div style="text-align:center;padding:40px 0;">
+      <div style="font-size:60px;margin-bottom:16px;">🏆</div>
+      <div class="battle-msg" style="color:var(--green);font-size:24px;">Победа!</div>
+      <div style="color:var(--text2);margin:8px 0 24px;">${capitalize(battleEnemyPoke.name)} пойман!</div>
+      <img src="${battleEnemyPoke.img}" style="width:120px;height:120px;object-fit:contain;margin-bottom:16px;">
+      <br>
+      <button class="btn-main btn-yellow" onclick="startBattle()" style="max-width:300px;">⚔️ Ещё битва</button>
+    </div>`;
+  // Add enemy to collection
+  if (!collection.find(c => c.id === battleEnemyPoke.id)) {
+    collection.push({ id: battleEnemyPoke.id, name: battleEnemyPoke.name, img: battleEnemyPoke.img, types: battleEnemyPoke.types });
+    localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+    incrementDailyQuest();
+  }
+  checkAchievements();
+}
+
+function battleLose() {
+  document.getElementById('battle-content').innerHTML = `
+    <div style="text-align:center;padding:40px 0;">
+      <div style="font-size:60px;margin-bottom:16px;">😢</div>
+      <div class="battle-msg" style="color:var(--red);font-size:24px;">Поражение</div>
+      <div style="color:var(--text2);margin:8px 0 24px;">Попробуй ещё раз!</div>
+      <button class="btn-main btn-yellow" onclick="startBattle()" style="max-width:300px;">⚔️ Попробовать снова</button>
+    </div>`;
+}
+
+// ---- PUZZLE ----
+let puzzlePieces = [];
+let puzzleSelected = -1;
+let puzzleMoves = 0;
+let puzzleSolved = false;
+let puzzlePokemonData = null;
+
+async function startPuzzle() {
+  showLoader(true);
+  puzzleSolved = false;
+  puzzleMoves = 0;
+  puzzleSelected = -1;
+  document.getElementById('puzzle-complete-msg').innerHTML = '';
+  try {
+    const id = Math.floor(Math.random() * 151) + 1;
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    puzzlePokemonData = data;
+    const imgUrl = data.sprites.other?.['official-artwork']?.front_default || data.sprites.front_default;
+    document.getElementById('puzzle-name').textContent = capitalize(data.name);
+    document.getElementById('puzzle-preview').src = imgUrl;
+
+    // Create 64 pieces (8x8), shuffle
+    puzzlePieces = Array.from({ length: 64 }, (_, i) => i);
+    // Fisher-Yates shuffle
+    for (let i = 63; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [puzzlePieces[i], puzzlePieces[j]] = [puzzlePieces[j], puzzlePieces[i]];
+    }
+
+    renderPuzzle(imgUrl);
+    document.getElementById('puzzle-moves').textContent = 'Ходов: 0';
+    showLoader(false);
+    goTo('screen-puzzle');
+  } catch(e) { showLoader(false); }
+}
+
+function renderPuzzle(imgUrl) {
+  const grid = document.getElementById('puzzle-grid');
+  grid.innerHTML = '';
+  puzzlePieces.forEach((piece, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'puzzle-cell' + (piece === idx ? ' correct' : '');
+    const col = piece % 8, row = Math.floor(piece / 8);
+    cell.style.backgroundImage = `url(${imgUrl})`;
+    cell.style.backgroundPosition = `${(col / 7) * 100}% ${(row / 7) * 100}%`;
+    cell.onclick = () => puzzleTap(idx, imgUrl);
+    grid.appendChild(cell);
+  });
+}
+
+function puzzleTap(idx, imgUrl) {
+  if (puzzleSolved) return;
+  const cells = document.querySelectorAll('.puzzle-cell');
+
+  if (puzzleSelected === -1) {
+    puzzleSelected = idx;
+    cells[idx].classList.add('selected');
+    playTapSound();
+  } else if (puzzleSelected === idx) {
+    cells[idx].classList.remove('selected');
+    puzzleSelected = -1;
+  } else {
+    // Swap
+    [puzzlePieces[puzzleSelected], puzzlePieces[idx]] = [puzzlePieces[idx], puzzlePieces[puzzleSelected]];
+    puzzleMoves++;
+    document.getElementById('puzzle-moves').textContent = 'Ходов: ' + puzzleMoves;
+    puzzleSelected = -1;
+    renderPuzzle(imgUrl);
+
+    // Check if solved
+    if (puzzlePieces.every((p, i) => p === i)) {
+      puzzleSolved = true;
+      playCorrectSound();
+      document.getElementById('puzzle-complete-msg').innerHTML = '<div class="puzzle-complete">🎉 Собрал за ' + puzzleMoves + ' ходов!</div>';
+      document.getElementById('puzzle-preview').style.opacity = '1';
+
+      // Add to collection
+      if (puzzlePokemonData && !collection.find(c => c.id === puzzlePokemonData.id)) {
+        const p = puzzlePokemonData;
+        const staticImg = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default;
+        collection.push({ id: p.id, name: p.name, img: staticImg, types: p.types.map(t => t.type.name) });
+        localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+        incrementDailyQuest();
+      }
+      checkAchievements();
+    }
+  }
+}
 
 // ---- COLORING ----
 const COLOR_PALETTE = ['#FF3B30','#FF9500','#FFD93D','#34C759','#5AC8FA','#007AFF','#AF52DE','#FF2D55','#8B4513','#000000'];
@@ -1675,6 +2054,7 @@ function checkWhosThat(btn, answer) {
       const staticImg = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default;
       collection.push({ id: p.id, name: p.name, img: staticImg, types: p.types.map(t => t.type.name) });
       localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+      incrementDailyQuest();
     }
     checkAchievements();
 
@@ -1798,6 +2178,7 @@ function checkSpelling(btn, answer) {
       const staticImg = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default;
       collection.push({ id: p.id, name: p.name, img: staticImg, types: p.types.map(t => t.type.name) });
       localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+      incrementDailyQuest();
     }
     checkAchievements();
 
@@ -1864,6 +2245,132 @@ function renderAchievements() {
   }).join('');
 }
 
+// ---- EVOLUTION ----
+const EVOLUTION_CHAINS = {
+  charmander: 'charmeleon', charmeleon: 'charizard',
+  bulbasaur: 'ivysaur', ivysaur: 'venusaur',
+  squirtle: 'wartortle', wartortle: 'blastoise',
+  pikachu: 'raichu',
+  eevee: ['vaporeon','jolteon','flareon'],
+  pidgey: 'pidgeotto', pidgeotto: 'pidgeot',
+  caterpie: 'metapod', metapod: 'butterfree',
+  weedle: 'kakuna', kakuna: 'beedrill',
+  geodude: 'graveler', graveler: 'golem',
+  machop: 'machoke', machoke: 'machamp',
+  gastly: 'haunter', haunter: 'gengar',
+  abra: 'kadabra', kadabra: 'alakazam',
+  dratini: 'dragonair', dragonair: 'dragonite',
+  magikarp: 'gyarados',
+};
+const EVOLVE_COUNT = 3;
+let catches = JSON.parse(localStorage.getItem('pokescan_catches') || '{}');
+
+function trackCatch(pokemonName) {
+  catches[pokemonName] = (catches[pokemonName] || 0) + 1;
+  localStorage.setItem('pokescan_catches', JSON.stringify(catches));
+
+  const evo = EVOLUTION_CHAINS[pokemonName];
+  if (evo && catches[pokemonName] >= EVOLVE_COUNT && catches[pokemonName] % EVOLVE_COUNT === 0) {
+    const target = Array.isArray(evo) ? evo[Math.floor(Math.random() * evo.length)] : evo;
+    setTimeout(() => triggerEvolution(pokemonName, target), 1500);
+  }
+}
+
+async function triggerEvolution(fromName, toName) {
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${toName}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const newImg = data.sprites.other?.['official-artwork']?.front_default || data.sprites.front_default;
+    const oldItem = collection.find(c => c.name === fromName);
+    const oldImg = oldItem?.img || '';
+
+    // Show evolution animation
+    const overlay = document.createElement('div');
+    overlay.className = 'evo-overlay';
+    overlay.innerHTML = `
+      <div class="evo-title">Эволюция!</div>
+      <img class="evo-sprite glow" src="${oldImg}" alt="${fromName}">
+      <div class="evo-arrow">⬇</div>
+      <img class="evo-new" src="${newImg}" alt="${toName}">
+      <div class="evo-name">${capitalize(toName)}</div>
+    `;
+    document.body.appendChild(overlay);
+    playCorrectSound();
+
+    // Update collection — replace old with evolved
+    if (oldItem) {
+      oldItem.name = data.name;
+      oldItem.id = data.id;
+      oldItem.img = newImg;
+      oldItem.types = data.types.map(t => t.type.name);
+      localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+    } else {
+      collection.push({ id: data.id, name: data.name, img: newImg, types: data.types.map(t => t.type.name) });
+      localStorage.setItem('pokescan_collection', JSON.stringify(collection));
+    }
+
+    setTimeout(() => overlay.remove(), 3500);
+  } catch(e) {}
+}
+
+// ---- DAILY STREAK & QUEST ----
+function getTodayStr() { return new Date().toISOString().slice(0, 10); }
+
+function updateDailyStreak() {
+  const today = getTodayStr();
+  const lastDay = localStorage.getItem('pokescan_last_day') || '';
+  let dayStreak = parseInt(localStorage.getItem('pokescan_day_streak') || '0');
+
+  if (lastDay === today) {
+    // same day, no change
+  } else {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (lastDay === yesterday) {
+      dayStreak++;
+    } else {
+      dayStreak = 1;
+    }
+    localStorage.setItem('pokescan_last_day', today);
+    localStorage.setItem('pokescan_day_streak', dayStreak);
+  }
+  document.getElementById('day-streak-val').textContent = dayStreak;
+}
+
+function getDailyQuest() {
+  const today = getTodayStr();
+  let q = JSON.parse(localStorage.getItem('pokescan_daily_quest') || '{}');
+  if (q.date !== today) {
+    q = { date: today, target: 3, caught: 0, done: false };
+    localStorage.setItem('pokescan_daily_quest', JSON.stringify(q));
+  }
+  return q;
+}
+
+function incrementDailyQuest() {
+  const q = getDailyQuest();
+  if (q.done) return;
+  q.caught++;
+  if (q.caught >= q.target) {
+    q.done = true;
+    showToast('🎯', 'Ежедневный квест выполнен!');
+    // Track total completed quests
+    let total = parseInt(localStorage.getItem('pokescan_quests_done') || '0') + 1;
+    localStorage.setItem('pokescan_quests_done', total);
+  }
+  localStorage.setItem('pokescan_daily_quest', JSON.stringify(q));
+  renderQuestStars();
+}
+
+function renderQuestStars() {
+  const q = getDailyQuest();
+  let stars = '';
+  for (let i = 0; i < q.target; i++) {
+    stars += i < q.caught ? '⭐' : '☆';
+  }
+  document.getElementById('quest-stars').textContent = stars;
+}
+
 // ---- SETTINGS ----
 function openSettings() {
   document.getElementById('set-anthropic').value = getAnthropicKey();
@@ -1894,6 +2401,8 @@ function checkKeysOnAction(needAnthropic) {
 
 // init
 updatePokedexProgress();
+updateDailyStreak();
+renderQuestStars();
 updateSettingsBtn();
 if (!getAnthropicKey()) setTimeout(() => openSettings(), 2200);
 setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 500); }, 2000);
